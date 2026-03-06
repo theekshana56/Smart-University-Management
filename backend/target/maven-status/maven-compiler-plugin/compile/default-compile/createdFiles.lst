@@ -1,0 +1,12 @@
+com\smartcampus\model\ResourceType.class
+com\smartcampus\service\ResourceService.class
+com\smartcampus\model\Resource.class
+com\smartcampus\config\CorsConfig$1.class
+com\smartcampus\dto\ResourceRequestDTO.class
+com\smartcampus\controller\ResourceController.class
+com\smartcampus\repository\ResourceRepository.class
+com\smartcampus\model\Resource$ResourceBuilder.class
+com\smartcampus\config\CorsConfig.class
+com\smartcampus\SmartCampusApplication.class
+com\smartcampus\dto\ResourceResponseDTO.class
+com\smartcampus\dto\ResourceResponseDTO$ResourceResponseDTOBuilder.class
