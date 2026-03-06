@@ -1,9 +1,9 @@
-C:\Users\leeza\OneDrive\Desktop\Y3S1\PAF\smart-campus\backend\src\main\java\com\smartcampus\config\CorsConfig.java
-C:\Users\leeza\OneDrive\Desktop\Y3S1\PAF\smart-campus\backend\src\main\java\com\smartcampus\controller\ResourceController.java
-C:\Users\leeza\OneDrive\Desktop\Y3S1\PAF\smart-campus\backend\src\main\java\com\smartcampus\dto\ResourceRequestDTO.java
-C:\Users\leeza\OneDrive\Desktop\Y3S1\PAF\smart-campus\backend\src\main\java\com\smartcampus\dto\ResourceResponseDTO.java
-C:\Users\leeza\OneDrive\Desktop\Y3S1\PAF\smart-campus\backend\src\main\java\com\smartcampus\model\Resource.java
-C:\Users\leeza\OneDrive\Desktop\Y3S1\PAF\smart-campus\backend\src\main\java\com\smartcampus\model\ResourceType.java
-C:\Users\leeza\OneDrive\Desktop\Y3S1\PAF\smart-campus\backend\src\main\java\com\smartcampus\repository\ResourceRepository.java
-C:\Users\leeza\OneDrive\Desktop\Y3S1\PAF\smart-campus\backend\src\main\java\com\smartcampus\service\ResourceService.java
-C:\Users\leeza\OneDrive\Desktop\Y3S1\PAF\smart-campus\backend\src\main\java\com\smartcampus\SmartCampusApplication.java
+D:\PAF project\Smart-University-Management\backend\src\main\java\com\smartcampus\config\CorsConfig.java
+D:\PAF project\Smart-University-Management\backend\src\main\java\com\smartcampus\controller\ResourceController.java
+D:\PAF project\Smart-University-Management\backend\src\main\java\com\smartcampus\dto\ResourceRequestDTO.java
+D:\PAF project\Smart-University-Management\backend\src\main\java\com\smartcampus\dto\ResourceResponseDTO.java
+D:\PAF project\Smart-University-Management\backend\src\main\java\com\smartcampus\model\Resource.java
+D:\PAF project\Smart-University-Management\backend\src\main\java\com\smartcampus\model\ResourceType.java
+D:\PAF project\Smart-University-Management\backend\src\main\java\com\smartcampus\repository\ResourceRepository.java
+D:\PAF project\Smart-University-Management\backend\src\main\java\com\smartcampus\service\ResourceService.java
+D:\PAF project\Smart-University-Management\backend\src\main\java\com\smartcampus\SmartCampusApplication.java
