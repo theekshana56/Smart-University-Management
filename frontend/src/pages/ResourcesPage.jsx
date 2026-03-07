@@ -12,10 +12,10 @@ const emptyForm = {
   capacity: 0,
   location: "",
   status: "ACTIVE",
-  availabilityWindows: "AVAILABLE", 
+  availabilityWindows: "AVAILABLE",
 };
 
-export default function ResourcesPage() {
+export default function ResourcesPage({ onLogout, user }) {
   const [items, setItems] = useState([]);
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
@@ -80,7 +80,7 @@ export default function ResourcesPage() {
   };
 
   return (
-    <ResourceLayout>
+    <ResourceLayout onLogout={onLogout} user={user}>
 
       <ResourceStats items={items} />
       <ResourceChart items={items} />

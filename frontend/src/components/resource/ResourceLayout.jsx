@@ -1,14 +1,18 @@
 import "./resource.css";
 
-export default function ResourceLayout({ children }) {
+
+
+export default function ResourceLayout({ children, onLogout, user }) {
+
+
   return (
     <div className="appShell">
       <aside className="sidebar">
         <div className="profile">
           <div className="avatar" />
           <div>
-            <div className="name">CampusNexus</div>
-            <div className="email">resources@campus</div>
+            <div className="name">{user?.name || "Campus User"}</div>
+            <div className="email">{user?.email || "user@campus.net"}</div>
           </div>
         </div>
 
@@ -25,7 +29,9 @@ export default function ResourceLayout({ children }) {
 
         </nav>
 
-        <div className="logout">Logout</div>
+        <div className="logout">
+          <button onClick={onLogout}>
+            Logout</button></div>
       </aside>
 
       <main className="content">
