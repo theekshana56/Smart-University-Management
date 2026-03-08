@@ -9,8 +9,24 @@ export default function ResourceLayout({ children, onLogout, user }) {
     <div className="appShell">
       <aside className="sidebar">
         <div className="profile">
-          <div className="avatar" />
-          <div>
+          <div className="avatar">
+            {user?.pictureUrl ? (
+              <img
+                src={user.pictureUrl}
+                alt="profile"
+                className="avatarImg"
+                referrerPolicy="no-referrer"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  e.target.nextSibling.style.display = 'flex';
+                }}
+              />
+            ) : null}
+            <div className="avatarPlaceholder" style={{ display: user?.pictureUrl ? 'none' : 'flex' }}>
+              {user?.name?.charAt(0).toUpperCase() || "U"}
+            </div>
+          </div>
+          <div style={{ minWidth: 0 }}>
             <div className="name">{user?.name || "Campus User"}</div>
             <div className="email">{user?.email || "user@campus.net"}</div>
           </div>

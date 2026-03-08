@@ -5,6 +5,7 @@ import { apiClient } from '../api/apiClient';
 export default function LoginPage({ onLogin }) {
     const [isLogin, setIsLogin] = useState(true);
     const [name, setName] = useState('');
+    const [pictureUrl, setPictureUrl] = useState('');
     const [email, setEmail] = useState(''); // Email takes the place of typical username in login
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -41,7 +42,8 @@ export default function LoginPage({ onLogin }) {
                 const response = await axios.post('http://localhost:8085/api/auth/signup', {
                     name,
                     email,
-                    password
+                    password,
+                    pictureUrl
                 });
 
                 setSuccess(response.data);
@@ -65,16 +67,28 @@ export default function LoginPage({ onLogin }) {
 
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                 {!isLogin && (
-                    <div>
-                        <label style={{ display: 'block', marginBottom: '5px' }}>Name:</label>
-                        <input
-                            type="text"
-                            value={name}
-                            onChange={e => setName(e.target.value)}
-                            style={{ width: '100%', padding: '10px', border: '1px solid #ccc', borderRadius: '4px', boxSizing: 'border-box' }}
-                            required={!isLogin}
-                        />
-                    </div>
+                    <>
+                        <div>
+                            <label style={{ display: 'block', marginBottom: '5px' }}>Name:</label>
+                            <input
+                                type="text"
+                                value={name}
+                                onChange={e => setName(e.target.value)}
+                                style={{ width: '100%', padding: '10px', border: '1px solid #ccc', borderRadius: '4px', boxSizing: 'border-box' }}
+                                required={!isLogin}
+                            />
+                        </div>
+                        <div>
+                            <label style={{ display: 'block', marginBottom: '5px' }}>Profile Picture URL:</label>
+                            <input
+                                type="text"
+                                value={pictureUrl}
+                                onChange={e => setPictureUrl(e.target.value)}
+                                style={{ width: '100%', padding: '10px', border: '1px solid #ccc', borderRadius: '4px', boxSizing: 'border-box' }}
+                                placeholder="Link to your photo"
+                            />
+                        </div>
+                    </>
                 )}
                 <div>
                     <label style={{ display: 'block', marginBottom: '5px' }}>Email:</label>

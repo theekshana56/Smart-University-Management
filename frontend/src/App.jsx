@@ -23,7 +23,12 @@ export default function App() {
     checkUser();
   }, []);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await apiClient.post("/logout");
+    } catch (err) {
+      console.error("Logout failed", err);
+    }
     setUser(null);
     delete axios.defaults.headers.common['Authorization'];
     delete apiClient.defaults.headers.common['Authorization'];
