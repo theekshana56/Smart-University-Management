@@ -24,6 +24,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         String email = oAuth2User.getAttribute("email");
         String name = oAuth2User.getAttribute("name");
+        String picture = oAuth2User.getAttribute("picture");
 
         Optional<User> userOpt = userRepository.findByEmail(email);
         if (userOpt.isEmpty()) {
@@ -31,11 +32,27 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             User newUser = new User();
             newUser.setEmail(email);
             newUser.setName(name);
+            newUser.setPictureUrl(picture);
             newUser.setRole("USER");
             // Set a dummy password for OAuth2 users as it's required by the model/db but
             // not used for login
             newUser.setPassword(UUID.randomUUID().toString());
             userRepository.save(newUser);
+        } else {
+            // Update existing user if name or picture changed
+            User user = userOpt.get();
+            boolean updated = false;
+            if (name != null && !name.equals(user.getName())) {
+                user.setName(name);
+                updated = true;
+            }
+            if (picture != null && !picture.equals(user.getPictureUrl())) {
+                user.setPictureUrl(picture);
+                updated = true;
+            }
+            if (updated) {
+                userRepository.save(user);
+            }
         }
 
         return oAuth2User;

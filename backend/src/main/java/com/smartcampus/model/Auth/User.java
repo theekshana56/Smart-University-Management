@@ -19,6 +19,9 @@ public class User {
 
     private String password;
 
+    @Column(length = 2000)
+    private String pictureUrl;
+
     public User() {
     }
 
@@ -63,5 +66,13 @@ public class User {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public String getPictureUrl() {
+        return pictureUrl;
+    }
+
+    public void setPictureUrl(String pictureUrl) {
+        this.pictureUrl = pictureUrl;
     }
 }
