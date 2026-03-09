@@ -2,7 +2,7 @@ import "./resource.css";
 
 
 
-export default function ResourceLayout({ children, onLogout, user }) {
+export default function ResourceLayout({ children, onLogout, user, onNavigate, currentPage }) {
 
 
   return (
@@ -34,14 +34,43 @@ export default function ResourceLayout({ children, onLogout, user }) {
 
         <nav className="nav">
 
-          {/* NEW Home button */}
-          <div className="navItem">Home</div>
+          <div
+            className={`navItem ${currentPage === 'Home' ? 'active' : ''}`}
+            onClick={() => onNavigate('Home')}
+            style={{ cursor: 'pointer' }}
+          >
+            Home
+          </div>
 
-          <div className="navItem active">Resources</div>
+          <div
+            className={`navItem ${currentPage === 'Resources' ? 'active' : ''}`}
+            onClick={() => onNavigate('Resources')}
+            style={{ cursor: 'pointer' }}
+          >
+            Resources
+          </div>
+
+          {user?.role === 'ADMIN' && (
+            <div
+              className={`navItem ${currentPage === 'Admin' ? 'active' : ''}`}
+              onClick={() => onNavigate('Admin')}
+              style={{ cursor: 'pointer', color: '#14b8a6', fontWeight: '700' }}
+            >
+              Admin Panel
+            </div>
+          )}
+
           <div className="navItem">Bookings</div>
           <div className="navItem">Tickets</div>
           <div className="navItem">Notifications</div>
-          <div className="navItem">Settings</div>
+
+          <div
+            className={`navItem ${currentPage === 'Settings' ? 'active' : ''}`}
+            onClick={() => onNavigate('Settings')}
+            style={{ cursor: 'pointer' }}
+          >
+            Settings
+          </div>
 
         </nav>
 

@@ -3,12 +3,17 @@ package com.smartcampus.service.Auth;
 import com.smartcampus.model.Auth.User;
 import com.smartcampus.repository.Auth.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -27,6 +32,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String picture = oAuth2User.getAttribute("picture");
 
         Optional<User> userOpt = userRepository.findByEmail(email);
+        String role;
+
         if (userOpt.isEmpty()) {
             // Register new user from Google
             User newUser = new User();
@@ -34,10 +41,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             newUser.setName(name);
             newUser.setPictureUrl(picture);
             newUser.setRole("USER");
-            // Set a dummy password for OAuth2 users as it's required by the model/db but
-            // not used for login
             newUser.setPassword(UUID.randomUUID().toString());
             userRepository.save(newUser);
+            role = "USER";
         } else {
             // Update existing user if name or picture changed
             User user = userOpt.get();
@@ -53,8 +59,16 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             if (updated) {
                 userRepository.save(user);
             }
+            role = user.getRole();
         }
 
-        return oAuth2User;
+        Collection<GrantedAuthority> authorities = new HashSet<>(oAuth2User.getAuthorities());
+        authorities.add(new SimpleGrantedAuthority("ROLE_" + role));
+
+        return new DefaultOAuth2User(
+                authorities,
+                oAuth2User.getAttributes(),
+                "email" // Principal attribute name as defined in application.properties or by provider
+        );
     }
 }

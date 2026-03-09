@@ -3,10 +3,22 @@ import axios from 'axios';
 import { apiClient } from './api/apiClient';
 import ResourcesPage from "./pages/ResourcesPage.jsx";
 import LoginPage from "./pages/LoginPage";
+import HomePage from "./pages/HomePage.jsx";
+import AdminPage from "./pages/AdminPage.jsx";
+import SettingsPage from "./pages/SettingsPage.jsx";
 
 export default function App() {
   const [user, setUser] = useState(null);
   const [checkingAuth, setCheckingAuth] = useState(true);
+  const [currentPage, setCurrentPage] = useState('Home');
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
 
   useEffect(() => {
     // Check if the user is already logged in via session (OAuth2)
@@ -43,6 +55,11 @@ export default function App() {
   }
 
   return (
-    <ResourcesPage onLogout={handleLogout} user={user} />
+    <>
+      {currentPage === 'Home' && <HomePage onLogout={handleLogout} user={user} onNavigate={setCurrentPage} theme={theme} onToggleTheme={toggleTheme} />}
+      {currentPage === 'Resources' && <ResourcesPage onLogout={handleLogout} user={user} onNavigate={setCurrentPage} theme={theme} onToggleTheme={toggleTheme} />}
+      {currentPage === 'Admin' && user?.role === 'ADMIN' && <AdminPage onLogout={handleLogout} user={user} onNavigate={setCurrentPage} theme={theme} onToggleTheme={toggleTheme} />}
+      {currentPage === 'Settings' && <SettingsPage onLogout={handleLogout} user={user} onNavigate={setCurrentPage} onUpdateUser={setUser} theme={theme} onToggleTheme={toggleTheme} />}
+    </>
   );
 }
