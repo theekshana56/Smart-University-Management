@@ -25,3 +25,4 @@ replay_pid*
 backend/target/classes/application.properties
 *.properties
 *.properties
+node_modules/
