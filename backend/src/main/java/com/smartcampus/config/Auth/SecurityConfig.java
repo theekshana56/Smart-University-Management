@@ -16,7 +16,10 @@ import com.smartcampus.service.Auth.CustomUserDetailsService;
 import com.smartcampus.service.Auth.CustomOAuth2UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
 
     @Autowired
