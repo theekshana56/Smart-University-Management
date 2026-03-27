@@ -50,7 +50,7 @@ export default function App() {
   }
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <Routes>
         <Route path="/" element={<HomePage onLogout={handleLogout} user={user} />} />
         <Route path="/resources" element={<ResourcesPage onLogout={handleLogout} user={user} />} />
