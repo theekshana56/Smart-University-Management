@@ -1,9 +1,7 @@
+import { NavLink } from "react-router-dom";
 import "./resource.css";
 
-
-
 export default function ResourceLayout({ children, onLogout, user }) {
-
 
   return (
     <div className="appShell">
@@ -33,16 +31,12 @@ export default function ResourceLayout({ children, onLogout, user }) {
         </div>
 
         <nav className="nav">
-
-          {/* NEW Home button */}
-          <div className="navItem">Home</div>
-
-          <div className="navItem active">Resources</div>
-          <div className="navItem">Bookings</div>
-          <div className="navItem">Tickets</div>
-          <div className="navItem">Notifications</div>
-          <div className="navItem">Settings</div>
-
+          <NavLink to="/" className={({isActive}) => isActive ? "navItem active" : "navItem"} end>Home</NavLink>
+          <NavLink to="/resources" className={({isActive}) => isActive ? "navItem active" : "navItem"}>Resources</NavLink>
+          <NavLink to="/bookings" className={({isActive}) => isActive ? "navItem active" : "navItem"}>Bookings</NavLink>
+          <NavLink to="/tickets" className={({isActive}) => isActive ? "navItem active" : "navItem"}>Tickets</NavLink>
+          <NavLink to="/notifications" className={({isActive}) => isActive ? "navItem active" : "navItem"}>Notifications</NavLink>
+          <NavLink to="/settings" className={({isActive}) => isActive ? "navItem active" : "navItem"}>Settings</NavLink>
         </nav>
 
         <div className="logout">
