@@ -80,6 +80,12 @@ export default function ResourceForm({ form, setForm, onSubmit, editingId, onCan
         </div>
       </div>
 
+      {form.availabilityWindows !== "AVAILABLE" && (
+        <p style={{ color: "orange", fontWeight: "600" }}>
+          ⚠️ Resource is not available for booking
+        </p>
+      )}
+
       <div className="row">
         <button className="btnPrimary" type="submit">
           {editingId ? "Update Resource" : "Add Resource"}

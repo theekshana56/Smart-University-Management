@@ -12,7 +12,7 @@ const emptyForm = {
   capacity: 0,
   location: "",
   status: "ACTIVE",
-  availabilityWindows: "AVAILABLE", 
+  availabilityWindows: "AVAILABLE",
 };
 
 export default function ResourcesPage() {
@@ -28,8 +28,10 @@ export default function ResourcesPage() {
     location: "",
   });
 
+  // 🔄 LOAD DATA
   const load = async () => {
     const params = {};
+
     if (filters.q) params.q = filters.q;
     if (filters.type) params.type = filters.type;
     if (filters.status) params.status = filters.status;
@@ -44,10 +46,19 @@ export default function ResourcesPage() {
     load();
   }, [filters.q, filters.type, filters.status, filters.minCap, filters.location]);
 
+  // ✅ SUBMIT (WITH CONFLICT DETECTION)
   const submit = async (e) => {
     e.preventDefault();
 
-    const payload = { ...form, capacity: Number(form.capacity) };
+    if (form.status === "ACTIVE" && form.availabilityWindows !== "AVAILABLE") {
+      alert("Conflict: Active resource must be AVAILABLE");
+      return;
+    }
+
+    const payload = {
+      ...form,
+      capacity: Number(form.capacity),
+    };
 
     if (editingId) {
       await resourceService.update(editingId, payload);
@@ -60,6 +71,7 @@ export default function ResourcesPage() {
     load();
   };
 
+  // ✏️ EDIT
   const edit = (r) => {
     setEditingId(r.id);
     setForm({
@@ -68,11 +80,13 @@ export default function ResourcesPage() {
       capacity: r.capacity,
       location: r.location,
       status: r.status,
-      availabilityWindows: r.availabilityWindows || "",
+      availabilityWindows: r.availabilityWindows || "AVAILABLE",
     });
+
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  // ❌ DELETE (SOFT DELETE)
   const remove = async (id) => {
     if (!confirm("Delete this resource?")) return;
     await resourceService.remove(id);
@@ -82,14 +96,17 @@ export default function ResourcesPage() {
   return (
     <ResourceLayout>
 
+      {/* 📊 DASHBOARD */}
       <ResourceStats items={items} />
       <ResourceChart items={items} />
 
       <div style={{ display: "flex", gap: 18, flexWrap: "wrap" }}>
+
+        {/* LEFT SIDE - FORM */}
         <div style={{ flex: "1 1 360px" }}>
           <h2 style={{ margin: 0 }}>Resources</h2>
           <p style={{ marginTop: 6, color: "var(--muted)" }}>
-            Add / update / delete and filter campus resources.
+            Add / update / delete and manage campus resources.
           </p>
 
           <ResourceForm
@@ -97,13 +114,14 @@ export default function ResourcesPage() {
             setForm={setForm}
             onSubmit={submit}
             editingId={editingId}
-            onCancel={() => {
+            onCancelEdit={() => {
               setEditingId(null);
               setForm(emptyForm);
             }}
           />
         </div>
 
+        {/* RIGHT SIDE - TABLE */}
         <div style={{ flex: "2 1 600px" }}>
           <ResourceList
             items={items}
@@ -113,6 +131,7 @@ export default function ResourcesPage() {
             onDelete={remove}
           />
         </div>
+
       </div>
     </ResourceLayout>
   );

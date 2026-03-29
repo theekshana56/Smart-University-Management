@@ -1,4 +1,3 @@
-// backend/src/main/java/com/smartcampus/controller/ResourceController.java
 package com.smartcampus.controller;
 
 import com.smartcampus.dto.*;
@@ -42,7 +41,7 @@ public class ResourceController {
         return service.search(type, minCap, location, status, q);
     }
 
-    // ✅ PDF Report download
+    // ✅ PDF Report download (UPDATED - NO ID)
     @GetMapping(value = "/report/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
     public ResponseEntity<byte[]> downloadReportPdf(
             @RequestParam(required = false) ResourceType type,
@@ -78,12 +77,12 @@ public class ResourceController {
             document.add(new Paragraph("Total Records: " + list.size()));
             document.add(new Paragraph(" "));
 
-            // ===== Table =====
-            PdfPTable table = new PdfPTable(7);
+            // ✅ UPDATED TABLE (6 columns instead of 7)
+            PdfPTable table = new PdfPTable(6);
             table.setWidthPercentage(100);
-            table.setWidths(new float[]{1.2f, 3.5f, 2.2f, 1.5f, 3.0f, 2.0f, 3.0f});
+            table.setWidths(new float[]{3.5f, 2.2f, 1.5f, 3.0f, 2.0f, 3.0f});
 
-            addHeader(table, "ID", headerColor);
+            // ✅ HEADERS (NO ID)
             addHeader(table, "Name", headerColor);
             addHeader(table, "Type", headerColor);
             addHeader(table, "Capacity", headerColor);
@@ -97,7 +96,7 @@ public class ResourceController {
 
                 Color rowColor = alternate ? rowAltColor : Color.WHITE;
 
-                table.addCell(createCell(String.valueOf(r.getId()), rowColor));
+                // ✅ REMOVED ID COLUMN
                 table.addCell(createCell(safe(r.getName()), rowColor));
                 table.addCell(createCell(String.valueOf(r.getType()), rowColor));
                 table.addCell(createCell(String.valueOf(r.getCapacity()), rowColor));

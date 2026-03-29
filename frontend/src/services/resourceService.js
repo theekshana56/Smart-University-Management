@@ -8,5 +8,8 @@ export const resourceService = {
 
   // ✅ PDF report
   downloadReportPdf: (params) =>
-    apiClient.get("/resources/report/pdf", { params, responseType: "blob" }).then(r => r.data),
+  apiClient.get("/resources/report/pdf", {
+    params,
+    responseType: "blob"
+  }).then(r => r.data),
 };
