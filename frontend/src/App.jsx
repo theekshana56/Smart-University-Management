@@ -3,9 +3,143 @@ import axios from 'axios';
 import { apiClient } from './api/apiClient';
 import ResourcesPage from "./pages/ResourcesPage.jsx";
 import LoginPage from "./pages/LoginPage";
+<<<<<<< Updated upstream
 import HomePage from "./pages/HomePage.jsx";
 import AdminPage from "./pages/AdminPage.jsx";
 import SettingsPage from "./pages/SettingsPage.jsx";
+=======
+import ResourcesPage from "./pages/ResourcesPage";
+import BookingsPage from "./pages/BookingsPage";
+import TicketsPage from "./pages/TicketsPage";
+import NotificationsPage from "./pages/NotificationsPage";
+import SettingsPage from "./pages/SettingsPage";
+import ProfilePage from "./pages/ProfilePage";
+import ManageUsersPage from "./pages/ManageUsersPage";
+import AdminDashboardPage from "./pages/AdminDashboardPage";
+import LandingPage from "./pages/LandingPage";
+import AppLoader from "./components/common/AppLoader";
+
+function AppRoutes({ user, onLogin, onLogout, onProfileUpdate }) {
+  const location = useLocation();
+  const [routeLoading, setRouteLoading] = useState(false);
+  const firstRender = useRef(true);
+  const isAuthenticated = Boolean(user);
+
+  useEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false;
+      return;
+    }
+
+    setRouteLoading(true);
+    const timer = setTimeout(() => setRouteLoading(false), 500);
+    return () => clearTimeout(timer);
+  }, [location.pathname]);
+
+  if (routeLoading) {
+    return <AppLoader label="Loading page..." variant="fullscreen" />;
+  }
+
+  const renderProtected = (element) =>
+    isAuthenticated ? element : <Navigate to="/" replace />;
+
+  return (
+    <>
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <LandingPage user={user} onLogout={onLogout} />
+          }
+        />
+
+        <Route
+          path="/login"
+          element={
+            isAuthenticated ? (
+              <Navigate to="/" replace />
+            ) : (
+              <LoginPage onLogin={onLogin} initialMode="login" />
+            )
+          }
+        />
+
+        <Route
+          path="/signup"
+          element={
+            isAuthenticated ? (
+              <Navigate to="/" replace />
+            ) : (
+              <LoginPage onLogin={onLogin} initialMode="signup" />
+            )
+          }
+        />
+
+        <Route
+          path="/admin"
+          element={
+            !isAuthenticated ? (
+              <Navigate to="/" replace />
+            ) : user?.role === "ADMIN" ? (
+              <AdminDashboardPage onLogout={onLogout} user={user} />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+
+        <Route
+          path="/resources"
+          element={renderProtected(<ResourcesPage onLogout={onLogout} user={user} />)}
+        />
+        <Route
+          path="/bookings"
+          element={renderProtected(<BookingsPage onLogout={onLogout} user={user} />)}
+        />
+        <Route
+          path="/tickets"
+          element={renderProtected(<TicketsPage onLogout={onLogout} user={user} />)}
+        />
+        <Route
+          path="/notifications"
+          element={renderProtected(<NotificationsPage onLogout={onLogout} user={user} />)}
+        />
+        <Route
+          path="/profile"
+          element={renderProtected(
+            <ProfilePage onLogout={onLogout} user={user} onProfileUpdate={onProfileUpdate} />
+          )}
+        />
+        <Route
+          path="/manage-users"
+          element={
+            !isAuthenticated ? (
+              <Navigate to="/" replace />
+            ) : user?.role === "ADMIN" ? (
+              <ManageUsersPage onLogout={onLogout} user={user} />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            !isAuthenticated ? (
+              <Navigate to="/" replace />
+            ) : user?.role === "ADMIN" ? (
+              <SettingsPage onLogout={onLogout} user={user} />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </>
+  );
+}
+>>>>>>> Stashed changes
 
 export default function App() {
   const [user, setUser] = useState(null);

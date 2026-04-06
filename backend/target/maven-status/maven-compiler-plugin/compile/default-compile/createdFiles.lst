@@ -1,7 +1,25 @@
 com\smartcampus\dto\Auth\LoginResponse.class
 com\smartcampus\model\ResourceType.class
+<<<<<<< Updated upstream
+=======
+com\smartcampus\repository\ResourceRepository.class
+com\smartcampus\dto\Auth\UpdateProfileRequest.class
+com\smartcampus\dto\Auth\AdminUserResponse.class
+com\smartcampus\dto\SystemSettingsDTO.class
+com\smartcampus\config\CorsConfig.class
+com\smartcampus\controller\Auth\AuthController.class
+com\smartcampus\dto\ResourceResponseDTO.class
+>>>>>>> Stashed changes
 com\smartcampus\service\ResourceService.class
 com\smartcampus\model\Resource.class
+<<<<<<< Updated upstream
+=======
+com\smartcampus\controller\SettingsController.class
+com\smartcampus\dto\Auth\AdminUpdateUserRequest.class
+com\smartcampus\model\SystemSettings.class
+com\smartcampus\service\Auth\CustomUserDetailsService.class
+com\smartcampus\config\CorsConfig$1.class
+>>>>>>> Stashed changes
 com\smartcampus\dto\ResourceRequestDTO.class
 com\smartcampus\controller\ResourceController.class
 com\smartcampus\repository\ResourceRepository.class
