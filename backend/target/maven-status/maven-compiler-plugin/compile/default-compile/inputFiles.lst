@@ -2,6 +2,7 @@ D:\PAF project\Smart-University-Management\backend\src\main\java\com\smartcampus
 D:\PAF project\Smart-University-Management\backend\src\main\java\com\smartcampus\config\CorsConfig.java
 D:\PAF project\Smart-University-Management\backend\src\main\java\com\smartcampus\controller\Auth\AuthController.java
 D:\PAF project\Smart-University-Management\backend\src\main\java\com\smartcampus\controller\ResourceController.java
+D:\PAF project\Smart-University-Management\backend\src\main\java\com\smartcampus\dto\Auth\AdminCreateUserRequest.java
 D:\PAF project\Smart-University-Management\backend\src\main\java\com\smartcampus\dto\Auth\LoginResponse.java
 D:\PAF project\Smart-University-Management\backend\src\main\java\com\smartcampus\dto\Auth\SignupRequest.java
 D:\PAF project\Smart-University-Management\backend\src\main\java\com\smartcampus\dto\ResourceRequestDTO.java

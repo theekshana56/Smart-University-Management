@@ -8,11 +8,14 @@ import bookingsIcon from "../../Assests/Bookings.png";
 import ticketsIcon from "../../Assests/ticket.png";
 import notificationsIcon from "../../Assests/notification.png";
 import settingsIcon from "../../Assests/Setting.png";
+import BrandLogo from "../common/BrandLogo.jsx";
 
 export default function ResourceLayout({ children, onLogout, user }) {
   return (
     <div className="appShell">
       <aside className="sideNav">
+        <BrandLogo className="sideNavBrand" />
+
         <div className="profile sideProfile">
           <div className="avatar">
             {user?.pictureUrl ? (
