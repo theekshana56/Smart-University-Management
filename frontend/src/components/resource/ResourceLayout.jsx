@@ -1,7 +1,6 @@
+import { NavLink } from "react-router-dom";
 import "./resource.css";
 
-<<<<<<< Updated upstream
-=======
 import homeIcon from "../../Assests/home.png";
 import adminIcon from "../../Assests/admin.png";
 import resourcesIcon from "../../Assests/resources.png";
@@ -12,16 +11,14 @@ import profileIcon from "../../Assests/profile.svg";
 import usersIcon from "../../Assests/profile.svg";
 import settingsIcon from "../../Assests/Setting.png";
 import BrandLogo from "../common/BrandLogo.jsx";
->>>>>>> Stashed changes
 
-
-export default function ResourceLayout({ children, onLogout, user, onNavigate, currentPage }) {
-
-
+export default function ResourceLayout({ children, onLogout, user }) {
   return (
     <div className="appShell">
-      <aside className="sidebar">
-        <div className="profile">
+      <aside className="sideNav">
+        <BrandLogo className="sideNavBrand" />
+
+        <div className="profile sideProfile">
           <div className="avatar">
             {user?.pictureUrl ? (
               <img
@@ -30,63 +27,52 @@ export default function ResourceLayout({ children, onLogout, user, onNavigate, c
                 className="avatarImg"
                 referrerPolicy="no-referrer"
                 onError={(e) => {
-                  e.target.style.display = 'none';
-                  e.target.nextSibling.style.display = 'flex';
+                  e.target.style.display = "none";
+                  e.target.nextSibling.style.display = "flex";
                 }}
               />
             ) : null}
-            <div className="avatarPlaceholder" style={{ display: user?.pictureUrl ? 'none' : 'flex' }}>
+            <div
+              className="avatarPlaceholder"
+              style={{ display: user?.pictureUrl ? "none" : "flex" }}
+            >
               {user?.name?.charAt(0).toUpperCase() || "U"}
             </div>
           </div>
-          <div style={{ minWidth: 0 }}>
+          <div className="sideProfileText" style={{ minWidth: 0 }}>
             <div className="name">{user?.name || "Campus User"}</div>
             <div className="email">{user?.email || "user@campus.net"}</div>
           </div>
         </div>
 
-        <nav className="nav">
-
-          <div
-            className={`navItem ${currentPage === 'Home' ? 'active' : ''}`}
-            onClick={() => onNavigate('Home')}
-            style={{ cursor: 'pointer' }}
+        <nav className="sideNavMenu">
+          <NavLink
+            to="/"
+            end
+            className={({ isActive }) =>
+              isActive ? "sideNavItem active" : "sideNavItem"
+            }
           >
-            Home
-          </div>
-
-          <div
-            className={`navItem ${currentPage === 'Resources' ? 'active' : ''}`}
-            onClick={() => onNavigate('Resources')}
-            style={{ cursor: 'pointer' }}
-          >
-            Resources
-          </div>
-
-          {user?.role === 'ADMIN' && (
-            <div
-              className={`navItem ${currentPage === 'Admin' ? 'active' : ''}`}
-              onClick={() => onNavigate('Admin')}
-              style={{ cursor: 'pointer', color: '#14b8a6', fontWeight: '700' }}
+            <img src={homeIcon} alt="" className="sideNavIcon" />
+            <span className="sideNavLabel">Home</span>
+          </NavLink>
+          {user?.role === "ADMIN" && (
+            <NavLink
+              to="/admin"
+              className={({ isActive }) =>
+                isActive ? "sideNavItem active" : "sideNavItem"
+              }
             >
-              Admin Panel
-            </div>
+              <img src={adminIcon} alt="" className="sideNavIcon" />
+              <span className="sideNavLabel">Admin Dashboard</span>
+            </NavLink>
           )}
-
-          <div className="navItem">Bookings</div>
-          <div className="navItem">Tickets</div>
-          <div className="navItem">Notifications</div>
-
-          <div
-            className={`navItem ${currentPage === 'Settings' ? 'active' : ''}`}
-            onClick={() => onNavigate('Settings')}
-            style={{ cursor: 'pointer' }}
+          <NavLink
+            to="/resources"
+            className={({ isActive }) =>
+              isActive ? "sideNavItem active" : "sideNavItem"
+            }
           >
-<<<<<<< Updated upstream
-            Settings
-          </div>
-
-=======
             <img src={resourcesIcon} alt="" className="sideNavIcon" />
             <span className="sideNavLabel">Resources</span>
           </NavLink>
@@ -148,16 +134,18 @@ export default function ResourceLayout({ children, onLogout, user, onNavigate, c
               <span className="sideNavLabel">Settings</span>
             </NavLink>
           )}
->>>>>>> Stashed changes
         </nav>
 
-        <div className="logout">
-          <button onClick={onLogout}>
-            Logout</button></div>
+        <div className="logout sideLogoutWrap">
+          <button onClick={onLogout} className="sideLogout">
+            <span className="sideLogoutIcon">⏏</span>
+            <span className="sideNavLabel">Logout</span>
+          </button>
+        </div>
       </aside>
 
       <main className="content">
-        {children}
+        <div className="contentInner">{children}</div>
       </main>
     </div>
   );

@@ -1,7 +1,16 @@
 import "./table.css";
 import { resourceService } from "../../services/resourceService";
+import AppLoader from "../common/AppLoader.jsx";
 
-export default function ResourceList({ items, loading, filters, setFilters, onEdit, onDelete }) {
+export default function ResourceList({
+  items,
+  loading,
+  filters,
+  setFilters,
+  onEdit,
+  onDelete,
+  canManageResources = false,
+}) {
 
   const downloadReport = async () => {
     try {
@@ -92,15 +101,23 @@ export default function ResourceList({ items, loading, filters, setFilters, onEd
               <th>Location</th>
               <th>Status</th>
               <th>Availability</th>
-              <th>Actions</th>
+              {canManageResources && <th>Actions</th>}
             </tr>
           </thead>
 
           <tbody>
             {loading ? (
-              <tr><td colSpan="8" className="muted">Loading...</td></tr>
+              <tr>
+                <td colSpan={canManageResources ? "8" : "7"} className="muted">
+                  <AppLoader label="Loading resources..." variant="table" />
+                </td>
+              </tr>
             ) : items.length === 0 ? (
-              <tr><td colSpan="8" className="muted">No resources found.</td></tr>
+              <tr>
+                <td colSpan={canManageResources ? "8" : "7"} className="muted">
+                  No resources found.
+                </td>
+              </tr>
             ) : (
               items.map((r) => (
                 <tr key={r.id}>
@@ -118,10 +135,12 @@ export default function ResourceList({ items, loading, filters, setFilters, onEd
                   {/* ✅ show availability */}
                   <td>{r.availabilityWindows}</td>
 
-                  <td className="actions">
-                    <button className="btnMini" onClick={() => onEdit(r)}>Edit</button>
-                    <button className="btnMini danger" onClick={() => onDelete(r.id)}>Delete</button>
-                  </td>
+                  {canManageResources && (
+                    <td className="actions">
+                      <button className="btnMini" onClick={() => onEdit(r)}>Edit</button>
+                      <button className="btnMini danger" onClick={() => onDelete(r.id)}>Delete</button>
+                    </td>
+                  )}
                 </tr>
               ))
             )}

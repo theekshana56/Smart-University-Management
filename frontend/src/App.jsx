@@ -1,20 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { apiClient } from './api/apiClient';
-import ResourcesPage from "./pages/ResourcesPage.jsx";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+
 import LoginPage from "./pages/LoginPage";
-<<<<<<< Updated upstream
-import HomePage from "./pages/HomePage.jsx";
-import AdminPage from "./pages/AdminPage.jsx";
-import SettingsPage from "./pages/SettingsPage.jsx";
-=======
 import ResourcesPage from "./pages/ResourcesPage";
 import BookingsPage from "./pages/BookingsPage";
 import TicketsPage from "./pages/TicketsPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import SettingsPage from "./pages/SettingsPage";
 import ProfilePage from "./pages/ProfilePage";
-import ManageUsersPage from "./pages/ManageUsersPage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 import LandingPage from "./pages/LandingPage";
 import AppLoader from "./components/common/AppLoader";
@@ -111,18 +106,6 @@ function AppRoutes({ user, onLogin, onLogout, onProfileUpdate }) {
           )}
         />
         <Route
-          path="/manage-users"
-          element={
-            !isAuthenticated ? (
-              <Navigate to="/" replace />
-            ) : user?.role === "ADMIN" ? (
-              <ManageUsersPage onLogout={onLogout} user={user} />
-            ) : (
-              <Navigate to="/" replace />
-            )
-          }
-        />
-        <Route
           path="/settings"
           element={
             !isAuthenticated ? (
@@ -139,7 +122,6 @@ function AppRoutes({ user, onLogin, onLogout, onProfileUpdate }) {
     </>
   );
 }
->>>>>>> Stashed changes
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -171,9 +153,9 @@ export default function App() {
 
   const handleLogout = async () => {
     try {
-      await apiClient.post("/logout");
+      await apiClient.post("/logout", {}, { withCredentials: true });
     } catch (err) {
-      console.error("Logout failed", err);
+      console.warn("Server-side logout failed or session already expired", err);
     }
     setUser(null);
     delete axios.defaults.headers.common['Authorization'];
@@ -181,19 +163,17 @@ export default function App() {
   };
 
   if (checkingAuth) {
-    return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', fontSize: '18px' }}>Loading...</div>;
-  }
-
-  if (!user) {
-    return <LoginPage onLogin={(userData) => setUser(userData)} />;
+    return <AppLoader label="Loading session..." variant="fullscreen" />;
   }
 
   return (
-    <>
-      {currentPage === 'Home' && <HomePage onLogout={handleLogout} user={user} onNavigate={setCurrentPage} theme={theme} onToggleTheme={toggleTheme} />}
-      {currentPage === 'Resources' && <ResourcesPage onLogout={handleLogout} user={user} onNavigate={setCurrentPage} theme={theme} onToggleTheme={toggleTheme} />}
-      {currentPage === 'Admin' && user?.role === 'ADMIN' && <AdminPage onLogout={handleLogout} user={user} onNavigate={setCurrentPage} theme={theme} onToggleTheme={toggleTheme} />}
-      {currentPage === 'Settings' && <SettingsPage onLogout={handleLogout} user={user} onNavigate={setCurrentPage} onUpdateUser={setUser} theme={theme} onToggleTheme={toggleTheme} />}
-    </>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
+      <AppRoutes
+        user={user}
+        onLogin={(userData) => setUser(userData)}
+        onLogout={handleLogout}
+        onProfileUpdate={(updatedUser) => setUser(updatedUser)}
+      />
+    </BrowserRouter>
   );
 }
