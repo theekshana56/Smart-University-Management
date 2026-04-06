@@ -10,6 +10,7 @@ import TicketsPage from "./pages/TicketsPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import SettingsPage from "./pages/SettingsPage";
 import ProfilePage from "./pages/ProfilePage";
+import ManageUsersPage from "./pages/ManageUsersPage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 import LandingPage from "./pages/LandingPage";
 import AppLoader from "./components/common/AppLoader";
@@ -112,6 +113,18 @@ function AppRoutes({ user, onLogin, onLogout, onProfileUpdate }) {
               <Navigate to="/" replace />
             ) : user?.role === "ADMIN" ? (
               <SettingsPage onLogout={onLogout} user={user} />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+        <Route
+          path="/manage-users"
+          element={
+            !isAuthenticated ? (
+              <Navigate to="/" replace />
+            ) : user?.role === "ADMIN" ? (
+              <ManageUsersPage onLogout={onLogout} user={user} />
             ) : (
               <Navigate to="/" replace />
             )
