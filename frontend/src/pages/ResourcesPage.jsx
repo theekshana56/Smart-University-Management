@@ -16,6 +16,9 @@ const emptyForm = {
 };
 
 export default function ResourcesPage({ onLogout, user }) {
+  const managerRoles = new Set(["ADMIN", "STAFF", "LECTURER"]);
+  const canManageResources = managerRoles.has((user?.role || "").toUpperCase());
+
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState(emptyForm);
@@ -52,6 +55,7 @@ export default function ResourcesPage({ onLogout, user }) {
 
   const submit = async (e) => {
     e.preventDefault();
+    if (!canManageResources) return;
 
     const payload = { ...form, capacity: Number(form.capacity) };
 
@@ -67,6 +71,7 @@ export default function ResourcesPage({ onLogout, user }) {
   };
 
   const edit = (r) => {
+    if (!canManageResources) return;
     setEditingId(r.id);
     setForm({
       name: r.name,
@@ -80,6 +85,7 @@ export default function ResourcesPage({ onLogout, user }) {
   };
 
   const remove = async (id) => {
+    if (!canManageResources) return;
     if (!confirm("Delete this resource?")) return;
     await resourceService.remove(id);
     load();
@@ -95,19 +101,23 @@ export default function ResourcesPage({ onLogout, user }) {
         <div style={{ flex: "1 1 360px" }}>
           <h2 style={{ margin: 0 }}>Resources</h2>
           <p style={{ marginTop: 6, color: "var(--muted)" }}>
-            Add / update / delete and filter campus resources.
+            {canManageResources
+              ? "Add / update / delete and filter campus resources."
+              : "View and filter campus resources. Resource management is limited to admin, staff, and lecturer roles."}
           </p>
 
-          <ResourceForm
-            form={form}
-            setForm={setForm}
-            onSubmit={submit}
-            editingId={editingId}
-            onCancel={() => {
-              setEditingId(null);
-              setForm(emptyForm);
-            }}
-          />
+          {canManageResources ? (
+            <ResourceForm
+              form={form}
+              setForm={setForm}
+              onSubmit={submit}
+              editingId={editingId}
+              onCancelEdit={() => {
+                setEditingId(null);
+                setForm(emptyForm);
+              }}
+            />
+          ) : null}
         </div>
 
         <div style={{ flex: "2 1 600px" }}>
@@ -118,6 +128,7 @@ export default function ResourcesPage({ onLogout, user }) {
             setFilters={setFilters}
             onEdit={edit}
             onDelete={remove}
+            canManageResources={canManageResources}
           />
         </div>
       </div>
