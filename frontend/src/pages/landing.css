@@ -53,6 +53,8 @@
   display: flex;
   gap: 10px;
   align-items: center;
+  width: 100%;
+  box-sizing: border-box;
   padding: 11px 12px;
   border-radius: 16px;
   background: linear-gradient(145deg, #d8dde6 0, #c7cfdb 62%, #bcc5d1 100%);
@@ -61,8 +63,8 @@
 }
 
 .landingAvatar {
-  width: 42px;
-  height: 42px;
+  width: 46px;
+  height: 46px;
   border-radius: 50%;
   background: linear-gradient(145deg, #374151, #111827);
   border: 2px solid rgba(255, 255, 255, 0.75);
@@ -219,8 +221,8 @@
 
 .landingSideNavAuth .landingProfile {
   justify-content: center;
-  padding-left: 0;
-  padding-right: 0;
+  padding: 8px 0;
+  gap: 0;
 }
 
 .landingSideNavAuth:hover .landingNavLink {
@@ -232,8 +234,8 @@
 
 .landingSideNavAuth:hover .landingProfile {
   justify-content: flex-start;
-  padding-left: 10px;
-  padding-right: 10px;
+  padding: 8px;
+  gap: 12px;
 }
 
 .landingSideNavAuth .landingNavLabel {

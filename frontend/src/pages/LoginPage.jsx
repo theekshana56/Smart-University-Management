@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import { apiClient } from "../api/apiClient";
 import AppLoader from "../components/common/AppLoader.jsx";
 import BrandLogo from "../components/common/BrandLogo.jsx";
 import "./login.css";
 
 export default function LoginPage({ onLogin, initialMode = "login" }) {
+  const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(initialMode !== "signup");
   const [name, setName] = useState("");
   const [pictureUrl, setPictureUrl] = useState("");
@@ -63,6 +65,21 @@ export default function LoginPage({ onLogin, initialMode = "login" }) {
   return (
     <div className="loginPage">
       <div className={`loginCard ${isLogin ? "modeSignIn" : "modeSignUp"}`}>
+        <button
+          type="button"
+          className="loginBackBtn"
+          onClick={() => {
+            if (window.history.length > 1) {
+              navigate(-1);
+            } else {
+              navigate("/", { replace: true });
+            }
+          }}
+        >
+          <span aria-hidden="true">←</span>
+          Back
+        </button>
+
         <BrandLogo className="loginBrand" />
 
         <div className="loginBadge" aria-hidden="true">
