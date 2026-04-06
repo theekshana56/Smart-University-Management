@@ -4,6 +4,8 @@ D:\PAF project\Smart-University-Management\backend\src\main\java\com\smartcampus
 D:\PAF project\Smart-University-Management\backend\src\main\java\com\smartcampus\controller\ResourceController.java
 D:\PAF project\Smart-University-Management\backend\src\main\java\com\smartcampus\controller\SettingsController.java
 D:\PAF project\Smart-University-Management\backend\src\main\java\com\smartcampus\dto\Auth\AdminCreateUserRequest.java
+D:\PAF project\Smart-University-Management\backend\src\main\java\com\smartcampus\dto\Auth\AdminUpdateUserRequest.java
+D:\PAF project\Smart-University-Management\backend\src\main\java\com\smartcampus\dto\Auth\AdminUserResponse.java
 D:\PAF project\Smart-University-Management\backend\src\main\java\com\smartcampus\dto\Auth\LoginResponse.java
 D:\PAF project\Smart-University-Management\backend\src\main\java\com\smartcampus\dto\Auth\SignupRequest.java
 D:\PAF project\Smart-University-Management\backend\src\main\java\com\smartcampus\dto\Auth\UpdateProfileRequest.java

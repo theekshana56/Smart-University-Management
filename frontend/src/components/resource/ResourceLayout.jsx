@@ -113,6 +113,17 @@ export default function ResourceLayout({ children, onLogout, user }) {
           </NavLink>
           {user?.role === "ADMIN" && (
             <NavLink
+              to="/manage-users"
+              className={({ isActive }) =>
+                isActive ? "sideNavItem active" : "sideNavItem"
+              }
+            >
+              <img src={profileIcon} alt="" className="sideNavIcon" />
+              <span className="sideNavLabel">Manage Users</span>
+            </NavLink>
+          )}
+          {user?.role === "ADMIN" && (
+            <NavLink
               to="/settings"
               className={({ isActive }) =>
                 isActive ? "sideNavItem active" : "sideNavItem"

@@ -123,6 +123,17 @@ export default function LandingPage({ user, onLogout }) {
               </NavLink>
               {user?.role === "ADMIN" && (
                 <NavLink
+                  to="/manage-users"
+                  className={({ isActive }) =>
+                    isActive ? "landingNavLink active" : "landingNavLink"
+                  }
+                >
+                  <img src={profileIcon} alt="" className="landingNavIcon" />
+                  <span className="landingNavLabel">Manage Users</span>
+                </NavLink>
+              )}
+              {user?.role === "ADMIN" && (
+                <NavLink
                   to="/settings"
                   className={({ isActive }) =>
                     isActive ? "landingNavLink active" : "landingNavLink"
