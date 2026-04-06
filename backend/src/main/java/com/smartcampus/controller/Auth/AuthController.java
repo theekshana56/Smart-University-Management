@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.smartcampus.dto.Auth.LoginResponse;
 import com.smartcampus.dto.Auth.SignupRequest;
+import com.smartcampus.dto.Auth.AdminCreateUserRequest;
 import com.smartcampus.model.Auth.User;
 import com.smartcampus.repository.Auth.UserRepository;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
@@ -49,6 +50,47 @@ public class AuthController {
         userRepository.save(user);
 
         return ResponseEntity.ok("User registered successfully!");
+    }
+
+    @PostMapping("/admin/users")
+    public ResponseEntity<?> createUserByAdmin(@RequestBody AdminCreateUserRequest request, Authentication authentication) {
+        // Ensure the caller is an admin
+        String authEmail = null;
+        if (authentication != null) {
+            authEmail = authentication.getName();
+        }
+
+        if (authEmail == null) {
+            return ResponseEntity.status(401).body("Unauthorized");
+        }
+
+        Optional<User> authUserOpt = userRepository.findByEmail(authEmail);
+        if (authUserOpt.isEmpty() || !"ADMIN".equalsIgnoreCase(authUserOpt.get().getRole())) {
+            return ResponseEntity.status(403).body("Forbidden: Admins only");
+        }
+
+        Optional<User> existingUser = userRepository.findByEmail(request.getEmail());
+        if (existingUser.isPresent()) {
+            return ResponseEntity.badRequest().body("Error: Email is already in use!");
+        }
+
+        String role = (request.getRole() == null || request.getRole().isBlank())
+                ? "USER"
+                : request.getRole().toUpperCase();
+
+        User user = new User(
+                request.getName(),
+                request.getEmail(),
+                passwordEncoder.encode(request.getPassword()),
+                role);
+
+        if (request.getPictureUrl() != null) {
+            user.setPictureUrl(request.getPictureUrl());
+        }
+
+        userRepository.save(user);
+
+        return ResponseEntity.ok("User created successfully by admin!");
     }
 
     @GetMapping("/me")

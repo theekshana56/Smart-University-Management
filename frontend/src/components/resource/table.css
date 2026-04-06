@@ -1,9 +1,9 @@
 .card{
   background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 16px;
+  border-radius: 18px;
   padding: 16px;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
 }
 
 .label{
@@ -22,7 +22,8 @@
 }
 
 .input:focus{
-  border-color: var(--accent);
+  border-color: #a5afbf;
+  box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.18);
 }
 
 .grid2{
@@ -44,16 +45,20 @@
 }
 
 .btnPrimary{
-  background: var(--accent);
-  color:#fff;
-  border:none;
+  background: linear-gradient(135deg, #1f2937, #0b1220);
+  color:#f8fafc;
+  border:1px solid #111827;
   padding:10px 14px;
   border-radius: 12px;
   font-weight:600;
 }
 
+.btnPrimary:hover{
+  background: linear-gradient(135deg, #111827, #020617);
+}
+
 .btnGhost{
-  background: transparent;
+  background: #fff;
   border:1px solid var(--border);
   padding:10px 14px;
   border-radius: 12px;
@@ -63,7 +68,7 @@
   padding:6px 10px;
   border-radius: 10px;
   border:1px solid var(--border);
-  background:#fff;
+  background:#f9fafb;
 }
 
 .btnMini.danger{
@@ -116,12 +121,12 @@ th{
 }
 
 .pill.ok{
-  background: rgba(46,139,87,0.12);
+  background: rgba(2,122,72,0.12);
   color: var(--success);
 }
 
 .pill.bad{
-  background: rgba(217,83,79,0.12);
+  background: rgba(180,35,24,0.12);
   color: var(--danger);
 }
 
@@ -146,7 +151,7 @@ th{
   border: 1px solid var(--border);
   border-radius: 18px;
   padding: 18px 18px 14px 18px;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
   min-height: 120px;
   display: flex;
   flex-direction: column;
