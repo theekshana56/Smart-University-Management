@@ -4,9 +4,11 @@ import ResourceStats from "../components/resource/ResourceStats.jsx";
 import ResourceChart from "../components/resource/ResourceChart.jsx";
 import { resourceService } from "../services/resourceService.js";
 import { apiClient } from "../api/apiClient.js";
+import AppLoader from "../components/common/AppLoader.jsx";
 
 export default function AdminDashboardPage({ onLogout, user }) {
   const [items, setItems] = useState([]);
+  const [loadingDashboard, setLoadingDashboard] = useState(true);
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState("");
   const [createSuccess, setCreateSuccess] = useState("");
@@ -20,11 +22,14 @@ export default function AdminDashboardPage({ onLogout, user }) {
 
   useEffect(() => {
     const load = async () => {
+      setLoadingDashboard(true);
       try {
         const data = await resourceService.list({});
         setItems(data);
       } catch (err) {
         console.error("Failed to load dashboard data", err);
+      } finally {
+        setLoadingDashboard(false);
       }
     };
     load();
@@ -67,8 +72,16 @@ export default function AdminDashboardPage({ onLogout, user }) {
           </p>
         </div>
 
-        <ResourceStats items={items} />
-        <ResourceChart items={items} />
+        {loadingDashboard ? (
+          <div className="card" style={{ padding: 24, textAlign: "center" }}>
+            <AppLoader label="Loading dashboard..." variant="inline" />
+          </div>
+        ) : (
+          <>
+            <ResourceStats items={items} />
+            <ResourceChart items={items} />
+          </>
+        )}
 
         <section className="card" style={{ padding: 20 }}>
           <h3 style={{ marginTop: 0, marginBottom: 8 }}>Create User</h3>
@@ -147,7 +160,11 @@ export default function AdminDashboardPage({ onLogout, user }) {
 
             <div style={{ alignSelf: "end" }}>
               <button type="submit" disabled={creating}>
-                {creating ? "Creating..." : "Create User"}
+                {creating ? (
+                  <AppLoader label="Creating..." variant="button" />
+                ) : (
+                  "Create User"
+                )}
               </button>
             </div>
           </form>

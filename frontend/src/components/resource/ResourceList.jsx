@@ -1,5 +1,6 @@
 import "./table.css";
 import { resourceService } from "../../services/resourceService";
+import AppLoader from "../common/AppLoader.jsx";
 
 export default function ResourceList({ items, loading, filters, setFilters, onEdit, onDelete }) {
 
@@ -98,7 +99,11 @@ export default function ResourceList({ items, loading, filters, setFilters, onEd
 
           <tbody>
             {loading ? (
-              <tr><td colSpan="8" className="muted">Loading...</td></tr>
+              <tr>
+                <td colSpan="8" className="muted">
+                  <AppLoader label="Loading resources..." variant="table" />
+                </td>
+              </tr>
             ) : items.length === 0 ? (
               <tr><td colSpan="8" className="muted">No resources found.</td></tr>
             ) : (
