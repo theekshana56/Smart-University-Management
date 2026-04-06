@@ -1,12 +1,12 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { apiClient } from "../api/apiClient";
 import AppLoader from "../components/common/AppLoader.jsx";
 import BrandLogo from "../components/common/BrandLogo.jsx";
 import "./login.css";
 
-export default function LoginPage({ onLogin }) {
-  const [isLogin, setIsLogin] = useState(true);
+export default function LoginPage({ onLogin, initialMode = "login" }) {
+  const [isLogin, setIsLogin] = useState(initialMode !== "signup");
   const [name, setName] = useState("");
   const [pictureUrl, setPictureUrl] = useState("");
   const [email, setEmail] = useState("");
@@ -14,6 +14,12 @@ export default function LoginPage({ onLogin }) {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setIsLogin(initialMode !== "signup");
+    setError("");
+    setSuccess("");
+  }, [initialMode]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

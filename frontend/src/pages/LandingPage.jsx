@@ -1,0 +1,180 @@
+import { Link, NavLink } from "react-router-dom";
+import BrandLogo from "../components/common/BrandLogo.jsx";
+import "./landing.css";
+
+export default function LandingPage({ user, onLogout }) {
+  const isAuthenticated = Boolean(user);
+
+  return (
+    <div className="landingPage">
+      <aside className="landingSideNav">
+        <a href="#home" className="landingBrand" aria-label="Smart University home">
+          <BrandLogo className="landingBrandLogo" />
+        </a>
+
+        <nav className="landingNav" aria-label="Landing navigation">
+          {isAuthenticated ? (
+            <>
+              <NavLink
+                to="/"
+                end
+                className={({ isActive }) =>
+                  isActive ? "landingNavLink active" : "landingNavLink"
+                }
+              >
+                Home
+              </NavLink>
+              {user?.role === "ADMIN" && (
+                <NavLink
+                  to="/admin"
+                  className={({ isActive }) =>
+                    isActive ? "landingNavLink active" : "landingNavLink"
+                  }
+                >
+                  Admin Dashboard
+                </NavLink>
+              )}
+              <NavLink
+                to="/resources"
+                className={({ isActive }) =>
+                  isActive ? "landingNavLink active" : "landingNavLink"
+                }
+              >
+                Resources
+              </NavLink>
+              <NavLink
+                to="/bookings"
+                className={({ isActive }) =>
+                  isActive ? "landingNavLink active" : "landingNavLink"
+                }
+              >
+                Bookings
+              </NavLink>
+              <NavLink
+                to="/tickets"
+                className={({ isActive }) =>
+                  isActive ? "landingNavLink active" : "landingNavLink"
+                }
+              >
+                Tickets
+              </NavLink>
+              <NavLink
+                to="/notifications"
+                className={({ isActive }) =>
+                  isActive ? "landingNavLink active" : "landingNavLink"
+                }
+              >
+                Notifications
+              </NavLink>
+              <NavLink
+                to="/settings"
+                className={({ isActive }) =>
+                  isActive ? "landingNavLink active" : "landingNavLink"
+                }
+              >
+                Settings
+              </NavLink>
+            </>
+          ) : (
+            <>
+              <a href="#home" className="landingNavLink active">
+                Home
+              </a>
+              <a href="#about" className="landingNavLink">
+                About Us
+              </a>
+              <a href="#features" className="landingNavLink">
+                Features
+              </a>
+              <a href="#contact" className="landingNavLink">
+                Contact
+              </a>
+            </>
+          )}
+        </nav>
+
+        <div className="landingAuthActions">
+          {isAuthenticated ? (
+            <button type="button" onClick={onLogout} className="landingBtn landingBtnPrimary">
+              Logout
+            </button>
+          ) : (
+            <>
+              <Link to="/login" className="landingBtn landingBtnGhost">
+                Login
+              </Link>
+              <Link to="/signup" className="landingBtn landingBtnPrimary">
+                Sign Up
+              </Link>
+            </>
+          )}
+        </div>
+      </aside>
+
+      <main className="landingContent">
+        <div className="landingContainer">
+          <section id="home" className="landingHeroSection">
+            <div className="landingHeroContent">
+              <h1>Manage Your Campus Smarter</h1>
+              <p>
+                One place to handle resources, bookings, tickets, notifications, and more for
+                students, lecturers, and administrators.
+              </p>
+              <div className="landingHeroActions">
+                {isAuthenticated ? (
+                  <>
+                    <Link to="/resources" className="landingBtn landingBtnPrimary">
+                      Manage Resources
+                    </Link>
+                    <Link to="/bookings" className="landingBtn landingBtnGhost">
+                      View Bookings
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <Link to="/signup" className="landingBtn landingBtnPrimary">
+                      Get Started
+                    </Link>
+                    <Link to="/login" className="landingBtn landingBtnGhost">
+                      I already have an account
+                    </Link>
+                  </>
+                )}
+              </div>
+            </div>
+          </section>
+
+          <section id="about" className="landingSection">
+            <h2>About Us</h2>
+            <p>
+              Smart University Management is built to simplify university operations and improve
+              communication between all campus users.
+            </p>
+          </section>
+
+          <section id="features" className="landingSection landingSectionMuted">
+            <div className="landingFeatureGrid">
+              <article className="landingFeatureCard">
+                <h3>Resource Tracking</h3>
+                <p>Track and manage equipment, rooms, and learning resources in one dashboard.</p>
+              </article>
+              <article className="landingFeatureCard">
+                <h3>Booking Workflows</h3>
+                <p>Handle booking requests with clear status updates and better visibility.</p>
+              </article>
+              <article className="landingFeatureCard">
+                <h3>Support Tickets</h3>
+                <p>Resolve issues faster with centralized ticket management for campus users.</p>
+              </article>
+            </div>
+          </section>
+
+          <footer id="contact" className="landingFooter">
+            <h2>Contact</h2>
+            <p>Need help? Reach out to the university IT support team for assistance.</p>
+          </footer>
+        </div>
+      </main>
+    </div>
+  );
+}
