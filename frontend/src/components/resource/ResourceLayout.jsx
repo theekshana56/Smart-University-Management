@@ -101,15 +101,17 @@ export default function ResourceLayout({ children, onLogout, user }) {
             <img src={notificationsIcon} alt="" className="sideNavIcon" />
             <span className="sideNavLabel">Notifications</span>
           </NavLink>
-          <NavLink
-            to="/settings"
-            className={({ isActive }) =>
-              isActive ? "sideNavItem active" : "sideNavItem"
-            }
-          >
-            <img src={settingsIcon} alt="" className="sideNavIcon" />
-            <span className="sideNavLabel">Settings</span>
-          </NavLink>
+          {user?.role === "ADMIN" && (
+            <NavLink
+              to="/settings"
+              className={({ isActive }) =>
+                isActive ? "sideNavItem active" : "sideNavItem"
+              }
+            >
+              <img src={settingsIcon} alt="" className="sideNavIcon" />
+              <span className="sideNavLabel">Settings</span>
+            </NavLink>
+          )}
         </nav>
 
         <div className="logout sideLogoutWrap">

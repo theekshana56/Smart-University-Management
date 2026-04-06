@@ -35,7 +35,7 @@ function AppRoutes({ user, onLogin, onLogout }) {
   }
 
   const renderProtected = (element) =>
-    isAuthenticated ? element : <Navigate to="/login" replace />;
+    isAuthenticated ? element : <Navigate to="/" replace />;
 
   return (
     <>
@@ -73,7 +73,7 @@ function AppRoutes({ user, onLogin, onLogout }) {
           path="/admin"
           element={
             !isAuthenticated ? (
-              <Navigate to="/login" replace />
+              <Navigate to="/" replace />
             ) : user?.role === "ADMIN" ? (
               <AdminDashboardPage onLogout={onLogout} user={user} />
             ) : (
@@ -100,7 +100,15 @@ function AppRoutes({ user, onLogin, onLogout }) {
         />
         <Route
           path="/settings"
-          element={renderProtected(<SettingsPage onLogout={onLogout} user={user} />)}
+          element={
+            !isAuthenticated ? (
+              <Navigate to="/" replace />
+            ) : user?.role === "ADMIN" ? (
+              <SettingsPage onLogout={onLogout} user={user} />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
         />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

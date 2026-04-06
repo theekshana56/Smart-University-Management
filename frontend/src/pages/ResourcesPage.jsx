@@ -93,18 +93,31 @@ export default function ResourcesPage({ onLogout, user }) {
 
   return (
     <ResourceLayout onLogout={onLogout} user={user}>
+      <section className="card resourcePageHeader">
+        <div>
+          <h1 className="resourcePageTitle">Campus Resources</h1>
+          <p className="resourcePageSubtitle">
+            Centralized view of all learning spaces and equipment across campus.
+          </p>
+        </div>
+        <span className={canManageResources ? "roleBadge manager" : "roleBadge viewer"}>
+          {canManageResources ? "Manager Access" : "View Only"}
+        </span>
+      </section>
 
       <ResourceStats items={items} />
       <ResourceChart items={items} />
 
-      <div style={{ display: "flex", gap: 18, flexWrap: "wrap" }}>
-        <div style={{ flex: "1 1 360px" }}>
-          <h2 style={{ margin: 0 }}>Resources</h2>
-          <p style={{ marginTop: 6, color: "var(--muted)" }}>
+      <div className="resourceSplit">
+        <section className="resourceManagePanel">
+          <div className="card resourceSectionIntro">
+            <h2 className="resourceSectionTitle">Resources</h2>
+            <p className="resourceSectionText">
             {canManageResources
               ? "Add / update / delete and filter campus resources."
               : "View and filter campus resources. Resource management is limited to admin, staff, and lecturer roles."}
-          </p>
+            </p>
+          </div>
 
           {canManageResources ? (
             <ResourceForm
@@ -118,9 +131,9 @@ export default function ResourcesPage({ onLogout, user }) {
               }}
             />
           ) : null}
-        </div>
+        </section>
 
-        <div style={{ flex: "2 1 600px" }}>
+        <section className="resourceListPanel">
           <ResourceList
             items={items}
             loading={loading}
@@ -130,7 +143,7 @@ export default function ResourcesPage({ onLogout, user }) {
             onDelete={remove}
             canManageResources={canManageResources}
           />
-        </div>
+        </section>
       </div>
     </ResourceLayout>
   );

@@ -1,13 +1,22 @@
 import { Link, NavLink } from "react-router-dom";
 import BrandLogo from "../components/common/BrandLogo.jsx";
+import homeIcon from "../Assests/home.png";
+import adminIcon from "../Assests/admin.png";
+import resourcesIcon from "../Assests/resources.png";
+import bookingsIcon from "../Assests/Bookings.png";
+import ticketsIcon from "../Assests/ticket.png";
+import notificationsIcon from "../Assests/notification.png";
+import settingsIcon from "../Assests/Setting.png";
 import "./landing.css";
 
 export default function LandingPage({ user, onLogout }) {
   const isAuthenticated = Boolean(user);
+  const managerRoles = new Set(["ADMIN", "STAFF", "LECTURER"]);
+  const canManageResources = managerRoles.has((user?.role || "").toUpperCase());
 
   return (
     <div className="landingPage">
-      <aside className="landingSideNav">
+      <aside className={isAuthenticated ? "landingSideNav landingSideNavAuth" : "landingSideNav"}>
         <a href="#home" className="landingBrand" aria-label="Smart University home">
           <BrandLogo className="landingBrandLogo" />
         </a>
@@ -22,7 +31,8 @@ export default function LandingPage({ user, onLogout }) {
                   isActive ? "landingNavLink active" : "landingNavLink"
                 }
               >
-                Home
+                <img src={homeIcon} alt="" className="landingNavIcon" />
+                <span className="landingNavLabel">Home</span>
               </NavLink>
               {user?.role === "ADMIN" && (
                 <NavLink
@@ -31,7 +41,8 @@ export default function LandingPage({ user, onLogout }) {
                     isActive ? "landingNavLink active" : "landingNavLink"
                   }
                 >
-                  Admin Dashboard
+                  <img src={adminIcon} alt="" className="landingNavIcon" />
+                  <span className="landingNavLabel">Admin Dashboard</span>
                 </NavLink>
               )}
               <NavLink
@@ -40,7 +51,8 @@ export default function LandingPage({ user, onLogout }) {
                   isActive ? "landingNavLink active" : "landingNavLink"
                 }
               >
-                Resources
+                <img src={resourcesIcon} alt="" className="landingNavIcon" />
+                <span className="landingNavLabel">Resources</span>
               </NavLink>
               <NavLink
                 to="/bookings"
@@ -48,7 +60,8 @@ export default function LandingPage({ user, onLogout }) {
                   isActive ? "landingNavLink active" : "landingNavLink"
                 }
               >
-                Bookings
+                <img src={bookingsIcon} alt="" className="landingNavIcon" />
+                <span className="landingNavLabel">Bookings</span>
               </NavLink>
               <NavLink
                 to="/tickets"
@@ -56,7 +69,8 @@ export default function LandingPage({ user, onLogout }) {
                   isActive ? "landingNavLink active" : "landingNavLink"
                 }
               >
-                Tickets
+                <img src={ticketsIcon} alt="" className="landingNavIcon" />
+                <span className="landingNavLabel">Tickets</span>
               </NavLink>
               <NavLink
                 to="/notifications"
@@ -64,16 +78,20 @@ export default function LandingPage({ user, onLogout }) {
                   isActive ? "landingNavLink active" : "landingNavLink"
                 }
               >
-                Notifications
+                <img src={notificationsIcon} alt="" className="landingNavIcon" />
+                <span className="landingNavLabel">Notifications</span>
               </NavLink>
-              <NavLink
-                to="/settings"
-                className={({ isActive }) =>
-                  isActive ? "landingNavLink active" : "landingNavLink"
-                }
-              >
-                Settings
-              </NavLink>
+              {user?.role === "ADMIN" && (
+                <NavLink
+                  to="/settings"
+                  className={({ isActive }) =>
+                    isActive ? "landingNavLink active" : "landingNavLink"
+                  }
+                >
+                  <img src={settingsIcon} alt="" className="landingNavIcon" />
+                  <span className="landingNavLabel">Settings</span>
+                </NavLink>
+              )}
             </>
           ) : (
             <>
@@ -124,7 +142,7 @@ export default function LandingPage({ user, onLogout }) {
                 {isAuthenticated ? (
                   <>
                     <Link to="/resources" className="landingBtn landingBtnPrimary">
-                      Manage Resources
+                      {canManageResources ? "Manage Resources" : "View Resources"}
                     </Link>
                     <Link to="/bookings" className="landingBtn landingBtnGhost">
                       View Bookings
