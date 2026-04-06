@@ -9,6 +9,7 @@ com\smartcampus\dto\ResourceRequestDTO.class
 com\smartcampus\controller\ResourceController.class
 com\smartcampus\repository\ResourceRepository.class
 com\smartcampus\model\Auth\User.class
+com\smartcampus\dto\Auth\UpdateProfileRequest.class
 com\smartcampus\model\Resource$ResourceBuilder.class
 com\smartcampus\config\Auth\SecurityConfig.class
 com\smartcampus\config\CorsConfig.class

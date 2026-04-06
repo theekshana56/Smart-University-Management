@@ -7,6 +7,7 @@ import resourcesIcon from "../../Assests/resources.png";
 import bookingsIcon from "../../Assests/Bookings.png";
 import ticketsIcon from "../../Assests/ticket.png";
 import notificationsIcon from "../../Assests/notification.png";
+import profileIcon from "../../Assests/profile.svg";
 import settingsIcon from "../../Assests/Setting.png";
 import BrandLogo from "../common/BrandLogo.jsx";
 
@@ -100,6 +101,15 @@ export default function ResourceLayout({ children, onLogout, user }) {
           >
             <img src={notificationsIcon} alt="" className="sideNavIcon" />
             <span className="sideNavLabel">Notifications</span>
+          </NavLink>
+          <NavLink
+            to="/profile"
+            className={({ isActive }) =>
+              isActive ? "sideNavItem active" : "sideNavItem"
+            }
+          >
+            <img src={profileIcon} alt="" className="sideNavIcon" />
+            <span className="sideNavLabel">Profile</span>
           </NavLink>
           {user?.role === "ADMIN" && (
             <NavLink

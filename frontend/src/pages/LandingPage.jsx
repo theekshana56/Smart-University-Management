@@ -6,6 +6,7 @@ import resourcesIcon from "../Assests/resources.png";
 import bookingsIcon from "../Assests/Bookings.png";
 import ticketsIcon from "../Assests/ticket.png";
 import notificationsIcon from "../Assests/notification.png";
+import profileIcon from "../Assests/profile.svg";
 import settingsIcon from "../Assests/Setting.png";
 import "./landing.css";
 
@@ -20,6 +21,36 @@ export default function LandingPage({ user, onLogout }) {
         <a href="#home" className="landingBrand" aria-label="Smart University home">
           <BrandLogo className="landingBrandLogo" />
         </a>
+
+        {isAuthenticated ? (
+          <div className="landingProfile">
+            <div className="landingAvatar">
+              {user?.pictureUrl ? (
+                <img
+                  src={user.pictureUrl}
+                  alt="profile"
+                  className="landingAvatarImg"
+                  referrerPolicy="no-referrer"
+                  onError={(e) => {
+                    e.target.style.display = "none";
+                    e.target.nextSibling.style.display = "flex";
+                  }}
+                />
+              ) : null}
+              <div
+                className="landingAvatarPlaceholder"
+                style={{ display: user?.pictureUrl ? "none" : "flex" }}
+              >
+                {user?.name?.charAt(0).toUpperCase() || "U"}
+              </div>
+            </div>
+
+            <div className="landingProfileText">
+              <div className="landingProfileName">{user?.name || "Campus User"}</div>
+              <div className="landingProfileEmail">{user?.email || "user@campus.net"}</div>
+            </div>
+          </div>
+        ) : null}
 
         <nav className="landingNav" aria-label="Landing navigation">
           {isAuthenticated ? (
@@ -80,6 +111,15 @@ export default function LandingPage({ user, onLogout }) {
               >
                 <img src={notificationsIcon} alt="" className="landingNavIcon" />
                 <span className="landingNavLabel">Notifications</span>
+              </NavLink>
+              <NavLink
+                to="/profile"
+                className={({ isActive }) =>
+                  isActive ? "landingNavLink active" : "landingNavLink"
+                }
+              >
+                <img src={profileIcon} alt="" className="landingNavIcon" />
+                <span className="landingNavLabel">Profile</span>
               </NavLink>
               {user?.role === "ADMIN" && (
                 <NavLink

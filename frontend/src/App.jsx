@@ -9,11 +9,12 @@ import BookingsPage from "./pages/BookingsPage";
 import TicketsPage from "./pages/TicketsPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import SettingsPage from "./pages/SettingsPage";
+import ProfilePage from "./pages/ProfilePage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 import LandingPage from "./pages/LandingPage";
 import AppLoader from "./components/common/AppLoader";
 
-function AppRoutes({ user, onLogin, onLogout }) {
+function AppRoutes({ user, onLogin, onLogout, onProfileUpdate }) {
   const location = useLocation();
   const [routeLoading, setRouteLoading] = useState(false);
   const firstRender = useRef(true);
@@ -99,6 +100,12 @@ function AppRoutes({ user, onLogin, onLogout }) {
           element={renderProtected(<NotificationsPage onLogout={onLogout} user={user} />)}
         />
         <Route
+          path="/profile"
+          element={renderProtected(
+            <ProfilePage onLogout={onLogout} user={user} onProfileUpdate={onProfileUpdate} />
+          )}
+        />
+        <Route
           path="/settings"
           element={
             !isAuthenticated ? (
@@ -137,9 +144,9 @@ export default function App() {
 
   const handleLogout = async () => {
     try {
-      await apiClient.post("/logout");
+      await apiClient.post("/logout", {}, { withCredentials: true });
     } catch (err) {
-      console.error("Logout failed", err);
+      console.warn("Server-side logout failed or session already expired", err);
     }
     setUser(null);
     delete axios.defaults.headers.common['Authorization'];
@@ -152,7 +159,12 @@ export default function App() {
 
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL}>
-      <AppRoutes user={user} onLogin={(userData) => setUser(userData)} onLogout={handleLogout} />
+      <AppRoutes
+        user={user}
+        onLogin={(userData) => setUser(userData)}
+        onLogout={handleLogout}
+        onProfileUpdate={(updatedUser) => setUser(updatedUser)}
+      />
     </BrowserRouter>
   );
 }

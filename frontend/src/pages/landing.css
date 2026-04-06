@@ -49,6 +49,65 @@
   width: 264px;
 }
 
+.landingProfile {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 11px 12px;
+  border-radius: 16px;
+  background: linear-gradient(145deg, #d8dde6 0, #c7cfdb 62%, #bcc5d1 100%);
+  border: 1px solid rgba(71, 85, 105, 0.45);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.16);
+}
+
+.landingAvatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #374151, #111827);
+  border: 2px solid rgba(255, 255, 255, 0.75);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.22);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.landingAvatarImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.landingAvatarPlaceholder {
+  font-weight: 800;
+  font-size: 1.05rem;
+  color: #ffffff;
+}
+
+.landingProfileText {
+  min-width: 0;
+}
+
+.landingProfileName {
+  font-weight: 800;
+  font-size: 0.98rem;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.landingProfileEmail {
+  font-size: 12px;
+  color: #475569;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .landingBrand {
   width: 100%;
   text-decoration: none;
@@ -158,11 +217,23 @@
   gap: 0;
 }
 
+.landingSideNavAuth .landingProfile {
+  justify-content: center;
+  padding-left: 0;
+  padding-right: 0;
+}
+
 .landingSideNavAuth:hover .landingNavLink {
   justify-content: flex-start;
   padding-left: 12px;
   padding-right: 12px;
   gap: 10px;
+}
+
+.landingSideNavAuth:hover .landingProfile {
+  justify-content: flex-start;
+  padding-left: 10px;
+  padding-right: 10px;
 }
 
 .landingSideNavAuth .landingNavLabel {
@@ -171,7 +242,21 @@
   max-width: 0;
 }
 
+.landingSideNavAuth .landingProfileText {
+  opacity: 0;
+  transform: translateX(-8px);
+  max-width: 0;
+  overflow: hidden;
+  transition: opacity 0.2s ease, transform 0.22s ease, max-width 0.22s ease;
+}
+
 .landingSideNavAuth:hover .landingNavLabel {
+  opacity: 1;
+  transform: translateX(0);
+  max-width: 180px;
+}
+
+.landingSideNavAuth:hover .landingProfileText {
   opacity: 1;
   transform: translateX(0);
   max-width: 180px;
@@ -344,6 +429,20 @@
 
   .landingSideNavAuth .landingNavLabel,
   .landingSideNavAuth:hover .landingNavLabel {
+    opacity: 1;
+    transform: translateX(0);
+    max-width: 180px;
+  }
+
+  .landingSideNavAuth .landingProfile,
+  .landingSideNavAuth:hover .landingProfile {
+    justify-content: flex-start;
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .landingSideNavAuth .landingProfileText,
+  .landingSideNavAuth:hover .landingProfileText {
     opacity: 1;
     transform: translateX(0);
     max-width: 180px;
