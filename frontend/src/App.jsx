@@ -5,18 +5,20 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-route
 
 import LoginPage from "./pages/LoginPage";
 import ResourcesPage from "./pages/ResourcesPage";
-import HomePage from "./pages/HomePage";
 import BookingsPage from "./pages/BookingsPage";
 import TicketsPage from "./pages/TicketsPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import SettingsPage from "./pages/SettingsPage";
+import ProfilePage from "./pages/ProfilePage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
+import LandingPage from "./pages/LandingPage";
 import AppLoader from "./components/common/AppLoader";
 
-function AppRoutes({ user, onLogout }) {
+function AppRoutes({ user, onLogin, onLogout, onProfileUpdate }) {
   const location = useLocation();
   const [routeLoading, setRouteLoading] = useState(false);
   const firstRender = useRef(true);
+  const isAuthenticated = Boolean(user);
 
   useEffect(() => {
     if (firstRender.current) {
@@ -33,29 +35,88 @@ function AppRoutes({ user, onLogout }) {
     return <AppLoader label="Loading page..." variant="fullscreen" />;
   }
 
+  const renderProtected = (element) =>
+    isAuthenticated ? element : <Navigate to="/" replace />;
+
   return (
     <>
       <Routes>
-        <Route path="/" element={<HomePage onLogout={onLogout} user={user} />} />
-
-        {user?.role === "ADMIN" && (
-          <Route
-            path="/admin"
-            element={<AdminDashboardPage onLogout={onLogout} user={user} />}
-          />
-        )}
-
-        {/* Fallback: non-admins trying /admin are redirected home */}
         <Route
-          path="/admin"
-          element={<Navigate to="/" replace />}
+          path="/"
+          element={
+            <LandingPage user={user} onLogout={onLogout} />
+          }
         />
 
-        <Route path="/resources" element={<ResourcesPage onLogout={onLogout} user={user} />} />
-        <Route path="/bookings" element={<BookingsPage onLogout={onLogout} user={user} />} />
-        <Route path="/tickets" element={<TicketsPage onLogout={onLogout} user={user} />} />
-        <Route path="/notifications" element={<NotificationsPage onLogout={onLogout} user={user} />} />
-        <Route path="/settings" element={<SettingsPage onLogout={onLogout} user={user} />} />
+        <Route
+          path="/login"
+          element={
+            isAuthenticated ? (
+              <Navigate to="/" replace />
+            ) : (
+              <LoginPage onLogin={onLogin} initialMode="login" />
+            )
+          }
+        />
+
+        <Route
+          path="/signup"
+          element={
+            isAuthenticated ? (
+              <Navigate to="/" replace />
+            ) : (
+              <LoginPage onLogin={onLogin} initialMode="signup" />
+            )
+          }
+        />
+
+        <Route
+          path="/admin"
+          element={
+            !isAuthenticated ? (
+              <Navigate to="/" replace />
+            ) : user?.role === "ADMIN" ? (
+              <AdminDashboardPage onLogout={onLogout} user={user} />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+
+        <Route
+          path="/resources"
+          element={renderProtected(<ResourcesPage onLogout={onLogout} user={user} />)}
+        />
+        <Route
+          path="/bookings"
+          element={renderProtected(<BookingsPage onLogout={onLogout} user={user} />)}
+        />
+        <Route
+          path="/tickets"
+          element={renderProtected(<TicketsPage onLogout={onLogout} user={user} />)}
+        />
+        <Route
+          path="/notifications"
+          element={renderProtected(<NotificationsPage onLogout={onLogout} user={user} />)}
+        />
+        <Route
+          path="/profile"
+          element={renderProtected(
+            <ProfilePage onLogout={onLogout} user={user} onProfileUpdate={onProfileUpdate} />
+          )}
+        />
+        <Route
+          path="/settings"
+          element={
+            !isAuthenticated ? (
+              <Navigate to="/" replace />
+            ) : user?.role === "ADMIN" ? (
+              <SettingsPage onLogout={onLogout} user={user} />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>
@@ -83,9 +144,9 @@ export default function App() {
 
   const handleLogout = async () => {
     try {
-      await apiClient.post("/logout");
+      await apiClient.post("/logout", {}, { withCredentials: true });
     } catch (err) {
-      console.error("Logout failed", err);
+      console.warn("Server-side logout failed or session already expired", err);
     }
     setUser(null);
     delete axios.defaults.headers.common['Authorization'];
@@ -96,13 +157,14 @@ export default function App() {
     return <AppLoader label="Loading session..." variant="fullscreen" />;
   }
 
-  if (!user) {
-    return <LoginPage onLogin={(userData) => setUser(userData)} />;
-  }
-
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL}>
-      <AppRoutes user={user} onLogout={handleLogout} />
+      <AppRoutes
+        user={user}
+        onLogin={(userData) => setUser(userData)}
+        onLogout={handleLogout}
+        onProfileUpdate={(updatedUser) => setUser(updatedUser)}
+      />
     </BrowserRouter>
   );
 }
