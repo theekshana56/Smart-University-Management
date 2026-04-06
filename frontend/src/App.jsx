@@ -10,6 +10,7 @@ import BookingsPage from "./pages/BookingsPage";
 import TicketsPage from "./pages/TicketsPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import SettingsPage from "./pages/SettingsPage";
+import AdminDashboardPage from "./pages/AdminDashboardPage";
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -53,6 +54,20 @@ export default function App() {
     <BrowserRouter basename={import.meta.env.BASE_URL}>
       <Routes>
         <Route path="/" element={<HomePage onLogout={handleLogout} user={user} />} />
+
+        {user?.role === "ADMIN" && (
+          <Route
+            path="/admin"
+            element={<AdminDashboardPage onLogout={handleLogout} user={user} />}
+          />
+        )}
+
+        {/* Fallback: non-admins trying /admin are redirected home */}
+        <Route
+          path="/admin"
+          element={<Navigate to="/" replace />}
+        />
+
         <Route path="/resources" element={<ResourcesPage onLogout={handleLogout} user={user} />} />
         <Route path="/bookings" element={<BookingsPage onLogout={handleLogout} user={user} />} />
         <Route path="/tickets" element={<TicketsPage onLogout={handleLogout} user={user} />} />

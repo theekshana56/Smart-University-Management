@@ -1,12 +1,19 @@
 import { NavLink } from "react-router-dom";
 import "./resource.css";
 
-export default function ResourceLayout({ children, onLogout, user }) {
+import homeIcon from "../../Assests/home.png";
+import adminIcon from "../../Assests/admin.png";
+import resourcesIcon from "../../Assests/resources.png";
+import bookingsIcon from "../../Assests/Bookings.png";
+import ticketsIcon from "../../Assests/ticket.png";
+import notificationsIcon from "../../Assests/notification.png";
+import settingsIcon from "../../Assests/Setting.png";
 
+export default function ResourceLayout({ children, onLogout, user }) {
   return (
     <div className="appShell">
-      <aside className="sidebar">
-        <div className="profile">
+      <aside className="sideNav">
+        <div className="profile sideProfile">
           <div className="avatar">
             {user?.pictureUrl ? (
               <img
@@ -15,37 +22,103 @@ export default function ResourceLayout({ children, onLogout, user }) {
                 className="avatarImg"
                 referrerPolicy="no-referrer"
                 onError={(e) => {
-                  e.target.style.display = 'none';
-                  e.target.nextSibling.style.display = 'flex';
+                  e.target.style.display = "none";
+                  e.target.nextSibling.style.display = "flex";
                 }}
               />
             ) : null}
-            <div className="avatarPlaceholder" style={{ display: user?.pictureUrl ? 'none' : 'flex' }}>
+            <div
+              className="avatarPlaceholder"
+              style={{ display: user?.pictureUrl ? "none" : "flex" }}
+            >
               {user?.name?.charAt(0).toUpperCase() || "U"}
             </div>
           </div>
-          <div style={{ minWidth: 0 }}>
+          <div className="sideProfileText" style={{ minWidth: 0 }}>
             <div className="name">{user?.name || "Campus User"}</div>
             <div className="email">{user?.email || "user@campus.net"}</div>
           </div>
         </div>
 
-        <nav className="nav">
-          <NavLink to="/" className={({isActive}) => isActive ? "navItem active" : "navItem"} end>Home</NavLink>
-          <NavLink to="/resources" className={({isActive}) => isActive ? "navItem active" : "navItem"}>Resources</NavLink>
-          <NavLink to="/bookings" className={({isActive}) => isActive ? "navItem active" : "navItem"}>Bookings</NavLink>
-          <NavLink to="/tickets" className={({isActive}) => isActive ? "navItem active" : "navItem"}>Tickets</NavLink>
-          <NavLink to="/notifications" className={({isActive}) => isActive ? "navItem active" : "navItem"}>Notifications</NavLink>
-          <NavLink to="/settings" className={({isActive}) => isActive ? "navItem active" : "navItem"}>Settings</NavLink>
+        <nav className="sideNavMenu">
+          <NavLink
+            to="/"
+            end
+            className={({ isActive }) =>
+              isActive ? "sideNavItem active" : "sideNavItem"
+            }
+          >
+            <img src={homeIcon} alt="" className="sideNavIcon" />
+            <span className="sideNavLabel">Home</span>
+          </NavLink>
+          {user?.role === "ADMIN" && (
+            <NavLink
+              to="/admin"
+              className={({ isActive }) =>
+                isActive ? "sideNavItem active" : "sideNavItem"
+              }
+            >
+              <img src={adminIcon} alt="" className="sideNavIcon" />
+              <span className="sideNavLabel">Admin Dashboard</span>
+            </NavLink>
+          )}
+          <NavLink
+            to="/resources"
+            className={({ isActive }) =>
+              isActive ? "sideNavItem active" : "sideNavItem"
+            }
+          >
+            <img src={resourcesIcon} alt="" className="sideNavIcon" />
+            <span className="sideNavLabel">Resources</span>
+          </NavLink>
+          <NavLink
+            to="/bookings"
+            className={({ isActive }) =>
+              isActive ? "sideNavItem active" : "sideNavItem"
+            }
+          >
+            <img src={bookingsIcon} alt="" className="sideNavIcon" />
+            <span className="sideNavLabel">Bookings</span>
+          </NavLink>
+          <NavLink
+            to="/tickets"
+            className={({ isActive }) =>
+              isActive ? "sideNavItem active" : "sideNavItem"
+            }
+          >
+            <img src={ticketsIcon} alt="" className="sideNavIcon" />
+            <span className="sideNavLabel">Tickets</span>
+          </NavLink>
+          <NavLink
+            to="/notifications"
+            className={({ isActive }) =>
+              isActive ? "sideNavItem active" : "sideNavItem"
+            }
+          >
+            <img src={notificationsIcon} alt="" className="sideNavIcon" />
+            <span className="sideNavLabel">Notifications</span>
+          </NavLink>
+          <NavLink
+            to="/settings"
+            className={({ isActive }) =>
+              isActive ? "sideNavItem active" : "sideNavItem"
+            }
+          >
+            <img src={settingsIcon} alt="" className="sideNavIcon" />
+            <span className="sideNavLabel">Settings</span>
+          </NavLink>
         </nav>
 
-        <div className="logout">
-          <button onClick={onLogout}>
-            Logout</button></div>
+        <div className="logout sideLogoutWrap">
+          <button onClick={onLogout} className="sideLogout">
+            <span className="sideLogoutIcon">⏏</span>
+            <span className="sideNavLabel">Logout</span>
+          </button>
+        </div>
       </aside>
 
       <main className="content">
-        {children}
+        <div className="contentInner">{children}</div>
       </main>
     </div>
   );
