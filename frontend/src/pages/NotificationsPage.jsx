@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import ResourceLayout from "../components/resource/ResourceLayout";
 import { notificationService } from "../services/notificationService";
+import "./notifications.css";
 
 export default function NotificationsPage({ onLogout, user }) {
   const [items, setItems] = useState([]);
@@ -78,9 +79,15 @@ export default function NotificationsPage({ onLogout, user }) {
     }
   };
 
+  const preferenceOptions = [
+    { key: "bookingUpdates", label: "Booking approval/rejection", hint: "Booking workflow updates" },
+    { key: "ticketStatusChanges", label: "Ticket status changes", hint: "When ticket state is updated" },
+    { key: "ticketComments", label: "New comments on your tickets", hint: "When someone comments on your ticket" },
+  ];
+
   return (
     <ResourceLayout onLogout={onLogout} user={user}>
-      <section className="card resourcePageHeader" style={{ width: "100%" }}>
+      <section className="card resourcePageHeader notificationsHeader">
         <div>
           <h1 className="resourcePageTitle">Notifications</h1>
           <p className="resourcePageSubtitle">
@@ -90,77 +97,67 @@ export default function NotificationsPage({ onLogout, user }) {
         <span className="roleBadge viewer">{user?.role || "USER"}</span>
       </section>
 
-      <section className="card" style={{ width: "100%" }}>
-        <div className="card" style={{ marginBottom: 12 }}>
-          <h3 style={{ marginBottom: 10 }}>Notification Preferences</h3>
-          <div style={{ display: "grid", gap: 10, maxWidth: 420 }}>
-            {[
-              { key: "bookingUpdates", label: "Booking approval/rejection" },
-              { key: "ticketStatusChanges", label: "Ticket status changes" },
-              { key: "ticketComments", label: "New comments on your tickets" },
-            ].map((pref) => (
-              <label
-                key={pref.key}
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "18px 1fr",
-                  alignItems: "start",
-                  columnGap: 10,
-                  justifyItems: "start",
-                  cursor: "pointer",
-                  lineHeight: 1.3,
-                }}
-              >
-                <input
-                  type="checkbox"
-                  checked={preferences[pref.key]}
-                  onChange={() => updatePreference(pref.key)}
-                  disabled={savingPrefs}
-                  style={{ marginTop: 2 }}
-                />
-                <span>{pref.label}</span>
+      <section className="card notificationsPanel">
+        <div className="notificationsPrefsCard">
+          <h3 className="notificationsSectionTitle">Notification Preferences</h3>
+          <div className="notificationsPrefsGrid">
+            {preferenceOptions.map((pref) => (
+              <label key={pref.key} className="notificationsPrefItem">
+                <span className="notificationsPrefTextWrap">
+                  <span className="notificationsPrefTitle">{pref.label}</span>
+                  <span className="notificationsPrefHint">{pref.hint}</span>
+                </span>
+                <span className="notificationsSwitch">
+                  <input
+                    type="checkbox"
+                    checked={preferences[pref.key]}
+                    onChange={() => updatePreference(pref.key)}
+                    disabled={savingPrefs}
+                  />
+                  <span className="notificationsSwitchSlider" />
+                </span>
               </label>
             ))}
           </div>
-          <p className="muted" style={{ marginTop: 8, fontSize: 12 }}>
+          <p className="muted notificationsPrefsStatus">
             {savingPrefs ? "Saving preferences..." : "Changes apply immediately."}
           </p>
         </div>
 
-        <div className="row" style={{ justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-          <strong>Unread: {unreadCount}</strong>
-          <button className="btnMini" onClick={onMarkAllRead} disabled={items.length === 0 || unreadCount === 0}>
+        <div className="notificationsToolbar">
+          <strong className="notificationsUnreadCount">Unread: {unreadCount}</strong>
+          <button
+            className="btnMini"
+            onClick={onMarkAllRead}
+            disabled={items.length === 0 || unreadCount === 0}
+          >
             Mark all as read
           </button>
         </div>
 
         {loading ? <p className="muted">Loading notifications...</p> : null}
-        {error ? <p className="muted" style={{ color: "#b91c1c" }}>{String(error)}</p> : null}
+        {error ? <p className="muted notificationsError">{String(error)}</p> : null}
 
         {!loading && !error && items.length === 0 ? (
           <p className="muted">No notifications yet.</p>
         ) : null}
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        <div className="notificationsList">
           {items.map((item) => {
             const isRead = item.isRead ?? item.read;
             return (
-              <div
+              <article
                 key={item.id}
-                className="card"
-                style={{
-                  border: isRead ? "1px solid #e5e7eb" : "1px solid #bfdbfe",
-                  background: isRead ? "#fff" : "#eff6ff",
-                }}
+                className={`notificationsItem ${isRead ? "isRead" : "isUnread"}`}
               >
-                <div className="row" style={{ justifyContent: "space-between", alignItems: "center" }}>
-                  <strong>{item.title}</strong>
-                  <span className="muted" style={{ fontSize: 12 }}>
+                <div className="notificationsItemTop">
+                  <strong className="notificationsItemTitle">{item.title}</strong>
+                  <span className="muted notificationsItemDate">
                     {item.createdAt ? new Date(item.createdAt).toLocaleString() : ""}
                   </span>
                 </div>
-                <p style={{ marginTop: 6, marginBottom: 6 }}>{item.message}</p>
-                <div className="row" style={{ justifyContent: "space-between", alignItems: "center" }}>
+                <p className="notificationsItemMessage">{item.message}</p>
+                <div className="notificationsItemBottom">
                   <span className="pill">{item.type}</span>
                   {!isRead ? (
                     <button className="btnMini" onClick={() => onMarkRead(item.id)}>
@@ -170,7 +167,7 @@ export default function NotificationsPage({ onLogout, user }) {
                     <span className="muted">Read</span>
                   )}
                 </div>
-              </div>
+              </article>
             );
           })}
         </div>

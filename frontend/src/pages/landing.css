@@ -119,6 +119,17 @@
   padding: 4px 0 8px;
 }
 
+.landingMenuToggle {
+  display: none;
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid rgba(71, 85, 105, 0.42);
+  background: linear-gradient(180deg, #cfd6e1 0, #c0c9d6 100%);
+  color: #111827;
+  font-weight: 700;
+  padding: 8px 12px;
+}
+
 .landingBrandLogo .brandLogoMark {
   width: 145px;
   height: 60px;
@@ -444,6 +455,20 @@
     position: static;
   }
 
+  .landingMenuToggle {
+    display: block;
+  }
+
+  .landingNav,
+  .landingAuthActions {
+    display: none;
+  }
+
+  .landingSideNav.navOpen .landingNav,
+  .landingSideNav.navOpen .landingAuthActions {
+    display: flex;
+  }
+
   .landingSideNavAuth,
   .landingSideNavAuth:hover {
     width: auto;
@@ -487,5 +512,62 @@
 
   .landingContent {
     padding: 18px 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .landingContainer {
+    width: calc(100% - 24px);
+  }
+
+  .landingSideNav {
+    margin: 10px 10px 0;
+    border-radius: 16px;
+    padding: 12px 10px;
+  }
+
+  .landingContent {
+    padding: 14px 10px;
+  }
+
+  .landingHeroSection {
+    padding: 8px 0 36px;
+  }
+
+  .landingSection {
+    padding: 42px 0;
+  }
+
+  .landingSectionMuted {
+    padding: 20px 14px;
+  }
+}
+
+@media (max-width: 560px) {
+  .landingProfile {
+    padding: 9px 10px;
+  }
+
+  .landingProfileEmail {
+    display: none;
+  }
+
+  .landingNavLink {
+    min-height: 40px;
+    padding: 8px 10px;
+  }
+
+  .landingHeroActions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .landingFeatureGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .landingFooter {
+    padding: 36px 0 48px;
   }
 }
