@@ -7,7 +7,6 @@ import bookingsIcon from "../Assests/Bookings.png";
 import ticketsIcon from "../Assests/ticket.png";
 import notificationsIcon from "../Assests/notification.png";
 import profileIcon from "../Assests/profile.svg";
-import usersIcon from "../Assests/profile.svg";
 import settingsIcon from "../Assests/Setting.png";
 import "./landing.css";
 
@@ -129,7 +128,7 @@ export default function LandingPage({ user, onLogout }) {
                     isActive ? "landingNavLink active" : "landingNavLink"
                   }
                 >
-                  <img src={usersIcon} alt="" className="landingNavIcon" />
+                  <img src={profileIcon} alt="" className="landingNavIcon" />
                   <span className="landingNavLabel">Manage Users</span>
                 </NavLink>
               )}

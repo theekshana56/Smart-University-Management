@@ -1,39 +1,53 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import ResourceLayout from "../components/resource/ResourceLayout.jsx";
-import AppLoader from "../components/common/AppLoader.jsx";
 import { adminUserService } from "../services/adminUserService.js";
+import AppLoader from "../components/common/AppLoader.jsx";
 import "../components/resource/table.css";
 
-const emptyForm = {
-  name: "",
-  email: "",
-  role: "USER",
-  pictureUrl: "",
-  password: "",
-};
+const ROLE_OPTIONS = ["ADMIN", "TECHNICIAN", "STAFF", "LECTURER", "STUDENT", "USER"];
+
+function getErrorMessage(error, fallback) {
+  const status = error?.response?.status;
+  const data = error?.response?.data;
+
+  if (status === 404 || status === 405) {
+    return "Manage users API is unavailable. Restart the backend server and try again.";
+  }
+  if (status === 403) {
+    return "Only ADMIN users can manage system users.";
+  }
+  if (typeof data === "string") return data;
+  if (data?.message) return data.message;
+  if (data?.error) return data.error;
+  return error?.message || fallback;
+}
 
 export default function ManageUsersPage({ onLogout, user }) {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [editingId, setEditingId] = useState(null);
-  const [form, setForm] = useState(emptyForm);
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [editingId, setEditingId] = useState(null);
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    role: "USER",
+    pictureUrl: "",
+    password: "",
+  });
 
-  const getErrorMessage = (err, fallback) => {
-    const status = err?.response?.status;
-    if (status === 401) return "Session expired. Please log in again.";
-    if (status === 403) return "Forbidden: Admin access is required.";
-    if (status === 404 || status === 405) {
-      return "User management API not available on running backend. Restart backend server.";
-    }
+  const isEditing = useMemo(() => editingId !== null, [editingId]);
 
-    const payload = err?.response?.data;
-    if (typeof payload === "string") return payload;
-    if (payload?.message) return String(payload.message);
-    if (payload?.error) return String(payload.error);
-    return fallback;
+  const resetForm = () => {
+    setEditingId(null);
+    setForm({
+      name: "",
+      email: "",
+      role: "USER",
+      pictureUrl: "",
+      password: "",
+    });
   };
 
   const loadUsers = async () => {
@@ -53,68 +67,61 @@ export default function ManageUsersPage({ onLogout, user }) {
     loadUsers();
   }, []);
 
-  const resetForm = () => {
-    setEditingId(null);
-    setForm(emptyForm);
+  const onChange = (key, value) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const startEdit = (u) => {
+    setEditingId(u.id);
+    setSuccess("");
+    setError("");
+    setForm({
+      name: u.name || "",
+      email: u.email || "",
+      role: u.role || "USER",
+      pictureUrl: u.pictureUrl || "",
+      password: "",
+    });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSaving(true);
+    setSubmitting(true);
     setError("");
     setSuccess("");
 
     try {
-      const payload = {
-        name: form.name,
-        email: form.email,
-        role: form.role,
-        pictureUrl: form.pictureUrl,
-        password: form.password,
-      };
-
-      if (editingId) {
-        await adminUserService.update(editingId, payload);
+      if (isEditing) {
+        await adminUserService.update(editingId, form);
         setSuccess("User updated successfully.");
       } else {
-        if (!form.password) {
+        if (!form.password.trim()) {
           setError("Password is required when creating a new user.");
-          setSaving(false);
+          setSubmitting(false);
           return;
         }
-        await adminUserService.create(payload);
+        await adminUserService.create(form);
         setSuccess("User created successfully.");
       }
-
       resetForm();
       await loadUsers();
     } catch (err) {
       setError(getErrorMessage(err, "Failed to save user."));
     } finally {
-      setSaving(false);
+      setSubmitting(false);
     }
   };
 
-  const startEdit = (targetUser) => {
-    setEditingId(targetUser.id);
-    setForm({
-      name: targetUser.name || "",
-      email: targetUser.email || "",
-      role: targetUser.role || "USER",
-      pictureUrl: targetUser.pictureUrl || "",
-      password: "",
-    });
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
   const handleDelete = async (id) => {
-    if (!window.confirm("Delete this user?")) return;
+    const confirmed = window.confirm("Delete this user account?");
+    if (!confirmed) return;
+
+    setError("");
+    setSuccess("");
     try {
-      setError("");
-      setSuccess("");
       await adminUserService.remove(id);
-      if (editingId === id) resetForm();
       setSuccess("User deleted successfully.");
+      if (editingId === id) resetForm();
       await loadUsers();
     } catch (err) {
       setError(getErrorMessage(err, "Failed to delete user."));
@@ -123,100 +130,78 @@ export default function ManageUsersPage({ onLogout, user }) {
 
   return (
     <ResourceLayout onLogout={onLogout} user={user}>
-      <div style={{ display: "grid", gap: 16 }}>
-        <div>
-          <h2 style={{ marginBottom: 6 }}>Manage Users</h2>
-          <p style={{ margin: 0, color: "var(--muted)" }}>
-            Create, update, and remove system users. This section is available to admins only.
+      <div style={{ display: "grid", gap: 20 }}>
+        <div className="card">
+          <h2 style={{ margin: 0 }}>Manage Users</h2>
+          <p style={{ marginTop: 8, marginBottom: 0, color: "var(--muted)" }}>
+            Create, edit, and remove system users. This section is available only for admins.
           </p>
         </div>
 
-        <form className="card" onSubmit={handleSubmit}>
-          {error ? (
-            <div style={{ marginBottom: 12, color: "#b71c1c", fontWeight: 600 }}>{String(error)}</div>
-          ) : null}
-          {success ? (
-            <div style={{ marginBottom: 12, color: "#1b5e20", fontWeight: 600 }}>{success}</div>
-          ) : null}
+        <div className="card">
+          <h3 style={{ marginTop: 0 }}>{isEditing ? "Edit User" : "Create User"}</h3>
+          {error ? <div style={{ color: "#b71c1c", marginBottom: 12 }}>{error}</div> : null}
+          {success ? <div style={{ color: "#1b5e20", marginBottom: 12 }}>{success}</div> : null}
 
-          <div className="grid2">
+          <form
+            onSubmit={handleSubmit}
+            style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 14 }}
+          >
             <div>
               <label className="label">Name</label>
-              <input
-                className="input"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                required
-              />
+              <input className="input" type="text" value={form.name} onChange={(e) => onChange("name", e.target.value)} required />
             </div>
             <div>
               <label className="label">Email</label>
-              <input
-                className="input"
-                type="email"
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                required
-              />
+              <input className="input" type="email" value={form.email} onChange={(e) => onChange("email", e.target.value)} required />
             </div>
             <div>
               <label className="label">Role</label>
-              <select
-                className="input"
-                value={form.role}
-                onChange={(e) => setForm({ ...form, role: e.target.value })}
-                required
-              >
-                <option value="ADMIN">ADMIN</option>
-                <option value="USER">USER</option>
-                <option value="LECTURER">LECTURER</option>
-                <option value="STUDENT">STUDENT</option>
-                <option value="STAFF">STAFF</option>
+              <select className="input" value={form.role} onChange={(e) => onChange("role", e.target.value)} required>
+                {ROLE_OPTIONS.map((role) => (
+                  <option key={role} value={role}>
+                    {role}
+                  </option>
+                ))}
               </select>
             </div>
             <div>
+              <label className="label">Picture URL</label>
+              <input className="input" type="url" value={form.pictureUrl} onChange={(e) => onChange("pictureUrl", e.target.value)} />
+            </div>
+            <div>
               <label className="label">
-                Password {editingId ? "(leave blank to keep current)" : ""}
+                Password {isEditing ? "(optional, set only to change)" : ""}
               </label>
-              <input
-                className="input"
-                type="password"
-                value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
-                required={!editingId}
-              />
+              <input className="input" type="password" value={form.password} onChange={(e) => onChange("password", e.target.value)} />
             </div>
-            <div style={{ gridColumn: "1 / -1" }}>
-              <label className="label">Picture URL (optional)</label>
-              <input
-                className="input"
-                value={form.pictureUrl}
-                onChange={(e) => setForm({ ...form, pictureUrl: e.target.value })}
-              />
-            </div>
-          </div>
-
-          <div className="row">
-            <button className="btnPrimary" type="submit" disabled={saving}>
-              {saving
-                ? <AppLoader label="Saving..." variant="button" />
-                : editingId ? "Update User" : "Create User"}
-            </button>
-            {editingId ? (
-              <button className="btnGhost" type="button" onClick={resetForm}>
-                Cancel Edit
+            <div style={{ display: "flex", gap: 8, alignItems: "end" }}>
+              <button type="submit" className="btnPrimary" disabled={submitting}>
+                {submitting ? "Saving..." : isEditing ? "Update User" : "Create User"}
               </button>
-            ) : null}
-          </div>
-        </form>
+              {isEditing ? (
+                <button type="button" className="btnGhost" onClick={resetForm}>
+                  Cancel
+                </button>
+              ) : null}
+            </div>
+          </form>
+        </div>
 
         <div className="card">
-          <h3 style={{ marginTop: 0, marginBottom: 10 }}>System Users</h3>
-          <div style={{ overflowX: "auto" }}>
+          <div className="topRow">
+            <h3 style={{ margin: 0 }}>All Users</h3>
+            <span className="pill">{users.length} total</span>
+          </div>
+
+          {loading ? (
+            <div style={{ padding: 20 }}>
+              <AppLoader label="Loading users..." variant="inline" />
+            </div>
+          ) : (
             <table className="table">
               <thead>
                 <tr>
-                  <th>ID</th>
                   <th>Name</th>
                   <th>Email</th>
                   <th>Role</th>
@@ -224,32 +209,21 @@ export default function ManageUsersPage({ onLogout, user }) {
                 </tr>
               </thead>
               <tbody>
-                {loading ? (
+                {users.length === 0 ? (
                   <tr>
-                    <td colSpan="5" className="muted">
-                      <AppLoader label="Loading users..." variant="table" />
-                    </td>
-                  </tr>
-                ) : users.length === 0 ? (
-                  <tr>
-                    <td colSpan="5" className="muted">No users found.</td>
+                    <td colSpan={4}>No users found.</td>
                   </tr>
                 ) : (
-                  users.map((rowUser) => (
-                    <tr key={rowUser.id}>
-                      <td>{rowUser.id}</td>
-                      <td>{rowUser.name}</td>
-                      <td>{rowUser.email}</td>
-                      <td>{rowUser.role}</td>
-                      <td className="actions">
-                        <button type="button" className="btnMini" onClick={() => startEdit(rowUser)}>
+                  users.map((u) => (
+                    <tr key={u.id}>
+                      <td>{u.name}</td>
+                      <td>{u.email}</td>
+                      <td>{u.role}</td>
+                      <td style={{ display: "flex", gap: 8 }}>
+                        <button type="button" className="btnMini" onClick={() => startEdit(u)}>
                           Edit
                         </button>
-                        <button
-                          type="button"
-                          className="btnMini danger"
-                          onClick={() => handleDelete(rowUser.id)}
-                        >
+                        <button type="button" className="btnMini danger" onClick={() => handleDelete(u.id)}>
                           Delete
                         </button>
                       </td>
@@ -258,7 +232,7 @@ export default function ManageUsersPage({ onLogout, user }) {
                 )}
               </tbody>
             </table>
-          </div>
+          )}
         </div>
       </div>
     </ResourceLayout>
