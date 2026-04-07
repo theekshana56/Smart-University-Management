@@ -4,7 +4,7 @@ import { adminUserService } from "../services/adminUserService.js";
 import AppLoader from "../components/common/AppLoader.jsx";
 import "../components/resource/table.css";
 
-const ROLE_OPTIONS = ["ADMIN", "STAFF", "LECTURER", "STUDENT", "USER"];
+const ROLE_OPTIONS = ["ADMIN", "TECHNICIAN", "STAFF", "LECTURER", "STUDENT", "USER"];
 
 function getErrorMessage(error, fallback) {
   const status = error?.response?.status;
