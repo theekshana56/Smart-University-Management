@@ -181,3 +181,56 @@ th{
   border-radius:16px;
   width:320px;
 }
+
+/* TYPE PILLS */
+.typePill{
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.typePill.lab {
+  background: #f0fdf4;
+  color: #16a34a;
+}
+
+.typePill.lecture_hall {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.typePill.meeting_room {
+  background: #fffbeb;
+  color: #d97706;
+}
+
+.typePill.equipment {
+  background: #f5f3ff;
+  color: #7c3aed;
+}
+
+/* TABLE ROW HOVER */
+tbody tr:hover {
+  background: rgba(0,0,0,0.02);
+  transition: background 0.15s;
+}
+
+/* CAPACITY BAR */
+.capBar {
+  width: 80px;
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 999px;
+  margin-top: 4px;
+  overflow: hidden;
+}
+
+.capBarFill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent);
+}
