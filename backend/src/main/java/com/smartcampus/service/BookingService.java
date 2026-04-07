@@ -20,11 +20,14 @@ public class BookingService {
 
     private final BookingRepository bookingRepository;
     private final ResourceRepository resourceRepository;
+    private final NotificationService notificationService;
 
     public BookingService(BookingRepository bookingRepository,
-            ResourceRepository resourceRepository) {
+            ResourceRepository resourceRepository,
+            NotificationService notificationService) {
         this.bookingRepository = bookingRepository;
         this.resourceRepository = resourceRepository;
+        this.notificationService = notificationService;
     }
 
     public Booking createBooking(BookingRequest request, User user) {
@@ -95,7 +98,15 @@ public class BookingService {
         }
         booking.setStatus(BookingStatus.APPROVED);
         booking.setRejectionReason(null);
-        return bookingRepository.save(booking);
+        Booking saved = bookingRepository.save(booking);
+        notificationService.create(
+                saved.getUser(),
+                com.smartcampus.model.NotificationType.BOOKING_APPROVED,
+                "Booking approved",
+                "Your booking request #" + saved.getId() + " has been approved.",
+                "BOOKING",
+                saved.getId());
+        return saved;
     }
 
     public Booking rejectBooking(Long id, String reason) {
@@ -107,7 +118,16 @@ public class BookingService {
         }
         booking.setStatus(BookingStatus.REJECTED);
         booking.setRejectionReason(reason);
-        return bookingRepository.save(booking);
+        Booking saved = bookingRepository.save(booking);
+        notificationService.create(
+                saved.getUser(),
+                com.smartcampus.model.NotificationType.BOOKING_REJECTED,
+                "Booking rejected",
+                "Your booking request #" + saved.getId() + " was rejected. Reason: "
+                        + (reason == null || reason.isBlank() ? "Not provided" : reason),
+                "BOOKING",
+                saved.getId());
+        return saved;
     }
 
     public Booking cancelBooking(Long id, User currentUser) {
