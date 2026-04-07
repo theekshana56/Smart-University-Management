@@ -124,10 +124,13 @@ export default function ResourceLayout({ children, onLogout, user }) {
               isActive ? "sideNavItem active" : "sideNavItem"
             }
           >
-            <img src={notificationsIcon} alt="" className="sideNavIcon" />
-            <span className="sideNavLabel">
-              Notifications{unreadCount > 0 ? ` (${unreadCount})` : ""}
+            <span className="sideNavIconWrap">
+              <img src={notificationsIcon} alt="" className="sideNavIcon" />
+              {unreadCount > 0 ? (
+                <span className="notifyBadge">{unreadCount > 99 ? "99+" : unreadCount}</span>
+              ) : null}
             </span>
+            <span className="sideNavLabel">Notifications</span>
           </NavLink>
           <NavLink
             to="/profile"

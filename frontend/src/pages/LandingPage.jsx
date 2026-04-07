@@ -133,10 +133,13 @@ export default function LandingPage({ user, onLogout }) {
                   isActive ? "landingNavLink active" : "landingNavLink"
                 }
               >
-                <img src={notificationsIcon} alt="" className="landingNavIcon" />
-                <span className="landingNavLabel">
-                  Notifications{unreadCount > 0 ? ` (${unreadCount})` : ""}
+                <span className="landingNavIconWrap">
+                  <img src={notificationsIcon} alt="" className="landingNavIcon" />
+                  {unreadCount > 0 ? (
+                    <span className="landingNotifyBadge">{unreadCount > 99 ? "99+" : unreadCount}</span>
+                  ) : null}
                 </span>
+                <span className="landingNavLabel">Notifications</span>
               </NavLink>
               <NavLink
                 to="/profile"
