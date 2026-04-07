@@ -83,6 +83,7 @@ export default function AdminDashboardPage({ onLogout, user }) {
           </>
         )}
 
+
         <div
           style={{
             display: "grid",
@@ -116,13 +117,6 @@ export default function AdminDashboardPage({ onLogout, user }) {
             <h3 style={{ marginBottom: 4 }}>Notifications</h3>
             <p style={{ margin: 0, color: "var(--muted)" }}>
               Send announcements and alerts across the campus.
-            </p>
-          </a>
-
-          <a href="/manage-users" className="card quickLink">
-            <h3 style={{ marginBottom: 4 }}>Manage Users</h3>
-            <p style={{ margin: 0, color: "var(--muted)" }}>
-              Update user roles, accounts, and profile details across the system.
             </p>
           </a>
 

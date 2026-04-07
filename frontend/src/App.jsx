@@ -5,20 +5,18 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-route
 
 import LoginPage from "./pages/LoginPage";
 import ResourcesPage from "./pages/ResourcesPage";
+import HomePage from "./pages/HomePage";
 import BookingsPage from "./pages/BookingsPage";
 import TicketsPage from "./pages/TicketsPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import SettingsPage from "./pages/SettingsPage";
-import ProfilePage from "./pages/ProfilePage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
-import LandingPage from "./pages/LandingPage";
 import AppLoader from "./components/common/AppLoader";
 
-function AppRoutes({ user, onLogin, onLogout, onProfileUpdate }) {
+function AppRoutes({ user, onLogout }) {
   const location = useLocation();
   const [routeLoading, setRouteLoading] = useState(false);
   const firstRender = useRef(true);
-  const isAuthenticated = Boolean(user);
 
   useEffect(() => {
     if (firstRender.current) {
@@ -35,88 +33,29 @@ function AppRoutes({ user, onLogin, onLogout, onProfileUpdate }) {
     return <AppLoader label="Loading page..." variant="fullscreen" />;
   }
 
-  const renderProtected = (element) =>
-    isAuthenticated ? element : <Navigate to="/" replace />;
-
   return (
     <>
       <Routes>
-        <Route
-          path="/"
-          element={
-            <LandingPage user={user} onLogout={onLogout} />
-          }
-        />
+        <Route path="/" element={<HomePage onLogout={onLogout} user={user} />} />
 
-        <Route
-          path="/login"
-          element={
-            isAuthenticated ? (
-              <Navigate to="/" replace />
-            ) : (
-              <LoginPage onLogin={onLogin} initialMode="login" />
-            )
-          }
-        />
+        {user?.role === "ADMIN" && (
+          <Route
+            path="/admin"
+            element={<AdminDashboardPage onLogout={onLogout} user={user} />}
+          />
+        )}
 
-        <Route
-          path="/signup"
-          element={
-            isAuthenticated ? (
-              <Navigate to="/" replace />
-            ) : (
-              <LoginPage onLogin={onLogin} initialMode="signup" />
-            )
-          }
-        />
-
+        {/* Fallback: non-admins trying /admin are redirected home */}
         <Route
           path="/admin"
-          element={
-            !isAuthenticated ? (
-              <Navigate to="/" replace />
-            ) : user?.role === "ADMIN" ? (
-              <AdminDashboardPage onLogout={onLogout} user={user} />
-            ) : (
-              <Navigate to="/" replace />
-            )
-          }
+          element={<Navigate to="/" replace />}
         />
 
-        <Route
-          path="/resources"
-          element={renderProtected(<ResourcesPage onLogout={onLogout} user={user} />)}
-        />
-        <Route
-          path="/bookings"
-          element={renderProtected(<BookingsPage onLogout={onLogout} user={user} />)}
-        />
-        <Route
-          path="/tickets"
-          element={renderProtected(<TicketsPage onLogout={onLogout} user={user} />)}
-        />
-        <Route
-          path="/notifications"
-          element={renderProtected(<NotificationsPage onLogout={onLogout} user={user} />)}
-        />
-        <Route
-          path="/profile"
-          element={renderProtected(
-            <ProfilePage onLogout={onLogout} user={user} onProfileUpdate={onProfileUpdate} />
-          )}
-        />
-        <Route
-          path="/settings"
-          element={
-            !isAuthenticated ? (
-              <Navigate to="/" replace />
-            ) : user?.role === "ADMIN" ? (
-              <SettingsPage onLogout={onLogout} user={user} />
-            ) : (
-              <Navigate to="/" replace />
-            )
-          }
-        />
+        <Route path="/resources" element={<ResourcesPage onLogout={onLogout} user={user} />} />
+        <Route path="/bookings" element={<BookingsPage onLogout={onLogout} user={user} />} />
+        <Route path="/tickets" element={<TicketsPage onLogout={onLogout} user={user} />} />
+        <Route path="/notifications" element={<NotificationsPage onLogout={onLogout} user={user} />} />
+        <Route path="/settings" element={<SettingsPage onLogout={onLogout} user={user} />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>
@@ -126,15 +65,6 @@ function AppRoutes({ user, onLogin, onLogout, onProfileUpdate }) {
 export default function App() {
   const [user, setUser] = useState(null);
   const [checkingAuth, setCheckingAuth] = useState(true);
-  const [currentPage, setCurrentPage] = useState('Home');
-  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
-
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('theme', theme);
-  }, [theme]);
-
-  const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
 
   useEffect(() => {
     // Check if the user is already logged in via session (OAuth2)
@@ -153,9 +83,9 @@ export default function App() {
 
   const handleLogout = async () => {
     try {
-      await apiClient.post("/logout", {}, { withCredentials: true });
+      await apiClient.post("/logout");
     } catch (err) {
-      console.warn("Server-side logout failed or session already expired", err);
+      console.error("Logout failed", err);
     }
     setUser(null);
     delete axios.defaults.headers.common['Authorization'];
@@ -166,14 +96,13 @@ export default function App() {
     return <AppLoader label="Loading session..." variant="fullscreen" />;
   }
 
+  if (!user) {
+    return <LoginPage onLogin={(userData) => setUser(userData)} />;
+  }
+
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL}>
-      <AppRoutes
-        user={user}
-        onLogin={(userData) => setUser(userData)}
-        onLogout={handleLogout}
-        onProfileUpdate={(updatedUser) => setUser(updatedUser)}
-      />
+      <AppRoutes user={user} onLogout={handleLogout} />
     </BrowserRouter>
   );
 }

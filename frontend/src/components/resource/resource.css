@@ -226,8 +226,6 @@
   white-space: nowrap;
   transition: opacity 0.2s ease, transform 0.22s ease, max-width 0.22s ease;
   font-size: 15px;
-  font-weight: 800;
-  letter-spacing: 0.2px;
 }
 
 .sideNav:hover .sideNavLabel {

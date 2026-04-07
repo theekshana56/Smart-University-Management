@@ -15,8 +15,9 @@ const emptyForm = {
   availabilityWindows: "AVAILABLE",
 };
 
-export default function ResourcesPage({ onLogout, user, onNavigate }) {
+export default function ResourcesPage({ onLogout, user }) {
   const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
 
@@ -29,6 +30,7 @@ export default function ResourcesPage({ onLogout, user, onNavigate }) {
   });
 
   const load = async () => {
+    setLoading(true);
     const params = {};
     if (filters.q) params.q = filters.q;
     if (filters.type) params.type = filters.type;
@@ -36,8 +38,12 @@ export default function ResourcesPage({ onLogout, user, onNavigate }) {
     if (filters.minCap) params.minCap = Number(filters.minCap);
     if (filters.location) params.location = filters.location;
 
-    const data = await resourceService.list(params);
-    setItems(data);
+    try {
+      const data = await resourceService.list(params);
+      setItems(data);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -80,7 +86,7 @@ export default function ResourcesPage({ onLogout, user, onNavigate }) {
   };
 
   return (
-    <ResourceLayout onLogout={onLogout} user={user} onNavigate={onNavigate} currentPage="Resources">
+    <ResourceLayout onLogout={onLogout} user={user}>
 
       <ResourceStats items={items} />
       <ResourceChart items={items} />
@@ -107,6 +113,7 @@ export default function ResourcesPage({ onLogout, user, onNavigate }) {
         <div style={{ flex: "2 1 600px" }}>
           <ResourceList
             items={items}
+            loading={loading}
             filters={filters}
             setFilters={setFilters}
             onEdit={edit}

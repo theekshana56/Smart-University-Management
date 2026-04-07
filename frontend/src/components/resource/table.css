@@ -1,186 +1,183 @@
-.card {
+.card{
   background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 16px;
+  border-radius: 18px;
   padding: 16px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
 }
 
-.label {
+.label{
   font-size: 13px;
   color: var(--muted);
-  display: block;
-  margin-bottom: 6px;
+  display:block;
+  margin-bottom:6px;
 }
 
-.input {
-  width: 100%;
-  padding: 10px 12px;
+.input{
+  width:100%;
+  padding:10px 12px;
   border-radius: 12px;
-  border: 1px solid var(--border);
-  outline: none;
-  background: var(--input-bg);
-  color: var(--text);
-  transition: all 0.2s ease;
+  border:1px solid var(--border);
+  outline:none;
 }
 
-.input:focus {
-  border-color: var(--accent);
+.input:focus{
+  border-color: #a5afbf;
+  box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.18);
 }
 
-.grid2 {
-  display: grid;
+.grid2{
+  display:grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
 }
 
-@media (max-width: 900px) {
-  .grid2 {
+@media (max-width: 900px){
+  .grid2{
     grid-template-columns: 1fr;
   }
 }
 
-.row {
-  display: flex;
-  gap: 10px;
-  margin-top: 12px;
+.row{
+  display:flex;
+  gap:10px;
+  margin-top:12px;
 }
 
-.btnPrimary {
-  background: var(--accent);
-  color: #fff;
-  border: none;
-  padding: 10px 14px;
+.btnPrimary{
+  background: linear-gradient(135deg, #1f2937, #0b1220);
+  color:#f8fafc;
+  border:1px solid #111827;
+  padding:10px 14px;
   border-radius: 12px;
-  font-weight: 600;
+  font-weight:600;
 }
 
-.btnGhost {
-  background: transparent;
-  border: 1px solid var(--border);
-  padding: 10px 14px;
+.btnPrimary:hover{
+  background: linear-gradient(135deg, #111827, #020617);
+}
+
+.btnGhost{
+  background: #fff;
+  border:1px solid var(--border);
+  padding:10px 14px;
   border-radius: 12px;
 }
 
-.btnMini {
-  padding: 6px 10px;
+.btnMini{
+  padding:6px 10px;
   border-radius: 10px;
-  border: 1px solid var(--border);
-  background: var(--input-bg);
-  color: var(--text);
+  border:1px solid var(--border);
+  background:#f9fafb;
 }
 
-.btnMini.danger {
+.btnMini.danger{
   border-color: #f0b2b0;
   color: var(--danger);
 }
 
-.table {
-  width: 100%;
+.table{
+  width:100%;
   border-collapse: collapse;
   margin-top: 12px;
   min-width: 720px;
 }
 
-th,
-td {
+th, td{
   padding: 12px 10px;
   border-bottom: 1px solid var(--border);
-  text-align: left;
+  text-align:left;
   font-size: 14px;
-  color: var(--text);
 }
 
-th {
+th{
   color: var(--muted);
   font-weight: 700;
 }
 
-.topRow {
-  display: flex;
+.topRow{
+  display:flex;
   gap: 10px;
-  align-items: center;
+  align-items:center;
   margin-bottom: 10px;
 }
 
-.mini {
+.mini{
   max-width: 170px;
 }
 
-.muted {
-  text-align: center;
+.muted{
+  text-align:center;
   color: var(--muted);
   padding: 18px;
 }
 
-.pill {
+.pill{
   padding: 5px 10px;
   border-radius: 999px;
   font-size: 12px;
   font-weight: 700;
-  display: inline-block;
+  display:inline-block;
 }
 
-.pill.ok {
-  background: rgba(46, 139, 87, 0.12);
+.pill.ok{
+  background: rgba(2,122,72,0.12);
   color: var(--success);
 }
 
-.pill.bad {
-  background: rgba(217, 83, 79, 0.12);
+.pill.bad{
+  background: rgba(180,35,24,0.12);
   color: var(--danger);
 }
 
-.actions {
-  display: flex;
-  gap: 8px;
+.actions{
+  display:flex;
+  gap:8px;
 }
 
 /* Stats row (optional) */
 
 /* ===== Stats cards ===== */
-.statsRow {
-  display: grid;
+.statsRow{
+  display:grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
   margin-bottom: 18px;
   width: 100%;
 }
 
-.statCard {
+.statCard{
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 18px;
   padding: 18px 18px 14px 18px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
   min-height: 120px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  /* value goes lower */
+  justify-content: space-between; /* value goes lower */
 }
 
-.statLabel {
+.statLabel{
   color: var(--muted);
   font-size: 15px;
   font-weight: 700;
 }
 
-.statValue {
+.statValue{
   font-size: 22px;
   font-weight: 800;
   margin-top: 18px;
-  color: var(--accent);
 }
 
 /* ===== Chart ===== */
-.chartCard {
+.chartCard{
   width: 100%;
   margin-bottom: 22px;
   min-height: 420px;
 }
 
-.chartWrap {
+.chartWrap{
   width: 100%;
   display: flex;
   justify-content: flex-start;
@@ -188,14 +185,14 @@ th {
 }
 
 /* responsive */
-@media (max-width: 1100px) {
-  .statsRow {
+@media (max-width: 1100px){
+  .statsRow{
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-@media (max-width: 700px) {
-  .statsRow {
+@media (max-width: 700px){
+  .statsRow{
     grid-template-columns: 1fr;
   }
 }
