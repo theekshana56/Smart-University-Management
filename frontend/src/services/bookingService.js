@@ -21,12 +21,27 @@ export const bookingService = {
     }
   },
 
-  async getAllBookings() {
+  async getAllBookings(filters = {}) {
     try {
-      const response = await apiClient.get("/bookings");
+      const params = Object.fromEntries(
+        Object.entries(filters).filter(([, value]) => value !== "" && value !== null && value !== undefined)
+      );
+      const response = await apiClient.get("/bookings", { params });
       return response.data;
     } catch (error) {
       console.error("Error fetching all bookings:", error);
+      throw error;
+    }
+  },
+
+  async getUnavailableResourceIds({ date, startTime, endTime }) {
+    try {
+      const response = await apiClient.get("/bookings/unavailable", {
+        params: { date, startTime, endTime }
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching unavailable resources:", error);
       throw error;
     }
   },
