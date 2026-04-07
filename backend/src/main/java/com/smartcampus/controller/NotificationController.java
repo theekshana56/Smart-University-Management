@@ -10,9 +10,11 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.smartcampus.dto.NotificationPreferencesDTO;
 import com.smartcampus.model.Auth.User;
 import com.smartcampus.repository.Auth.UserRepository;
 import com.smartcampus.service.NotificationService;
@@ -42,6 +44,21 @@ public class NotificationController {
         User currentUser = currentUser(authentication);
         long count = notificationService.unreadCount(currentUser.getId());
         return ResponseEntity.ok(Map.of("count", count));
+    }
+
+    @GetMapping("/preferences")
+    public ResponseEntity<?> getPreferences(Authentication authentication) {
+        User currentUser = currentUser(authentication);
+        NotificationPreferencesDTO dto = notificationService.getPreferences(currentUser.getId());
+        return ResponseEntity.ok(dto);
+    }
+
+    @PutMapping("/preferences")
+    public ResponseEntity<?> updatePreferences(@RequestBody NotificationPreferencesDTO request,
+            Authentication authentication) {
+        User currentUser = currentUser(authentication);
+        NotificationPreferencesDTO dto = notificationService.updatePreferences(currentUser.getId(), request);
+        return ResponseEntity.ok(dto);
     }
 
     @PutMapping("/{id}/read")

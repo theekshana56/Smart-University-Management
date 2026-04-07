@@ -20,4 +20,14 @@ export const notificationService = {
     const response = await apiClient.put("/notifications/read-all");
     return response.data;
   },
+
+  async getPreferences() {
+    const response = await apiClient.get("/notifications/preferences");
+    return response.data;
+  },
+
+  async updatePreferences(payload) {
+    const response = await apiClient.put("/notifications/preferences", payload);
+    return response.data;
+  },
 };

@@ -22,6 +22,18 @@ public class User {
     @Column(length = 2000)
     private String pictureUrl;
 
+    @Column(nullable = false)
+    private boolean notifyBookingUpdates = true;
+
+    @Column(nullable = false)
+    private boolean notifyTicketStatusChanges = true;
+
+    @Column(nullable = false)
+    private boolean notifyTicketComments = true;
+
+    @Column(nullable = false)
+    private boolean notificationPreferencesCustomized = false;
+
     public User() {
     }
 
@@ -74,5 +86,37 @@ public class User {
 
     public void setPictureUrl(String pictureUrl) {
         this.pictureUrl = pictureUrl;
+    }
+
+    public boolean isNotifyBookingUpdates() {
+        return notifyBookingUpdates;
+    }
+
+    public void setNotifyBookingUpdates(boolean notifyBookingUpdates) {
+        this.notifyBookingUpdates = notifyBookingUpdates;
+    }
+
+    public boolean isNotifyTicketStatusChanges() {
+        return notifyTicketStatusChanges;
+    }
+
+    public void setNotifyTicketStatusChanges(boolean notifyTicketStatusChanges) {
+        this.notifyTicketStatusChanges = notifyTicketStatusChanges;
+    }
+
+    public boolean isNotifyTicketComments() {
+        return notifyTicketComments;
+    }
+
+    public void setNotifyTicketComments(boolean notifyTicketComments) {
+        this.notifyTicketComments = notifyTicketComments;
+    }
+
+    public boolean isNotificationPreferencesCustomized() {
+        return notificationPreferencesCustomized;
+    }
+
+    public void setNotificationPreferencesCustomized(boolean notificationPreferencesCustomized) {
+        this.notificationPreferencesCustomized = notificationPreferencesCustomized;
     }
 }

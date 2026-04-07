@@ -1,6 +1,7 @@
 package com.smartcampus.controller;
 
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -25,6 +26,7 @@ import com.smartcampus.model.Notification;
 import com.smartcampus.model.NotificationType;
 import com.smartcampus.repository.Auth.UserRepository;
 import com.smartcampus.service.NotificationService;
+import com.smartcampus.dto.NotificationPreferencesDTO;
 
 @WebMvcTest(controllers = NotificationController.class)
 class NotificationControllerTest {
@@ -101,6 +103,33 @@ class NotificationControllerTest {
 
         verify(notificationService).markRead(eq(99L), eq(3L));
         verify(notificationService).markAllRead(eq(3L));
+    }
+
+    @Test
+    @WithMockUser(username = "prefs@uni.lk", roles = "USER")
+    void preferencesEndpointsWork() throws Exception {
+        when(userRepository.findByEmail("prefs@uni.lk")).thenReturn(Optional.of(buildUser(4L, "USER", "prefs@uni.lk")));
+        NotificationPreferencesDTO dto = new NotificationPreferencesDTO();
+        dto.setBookingUpdates(true);
+        dto.setTicketStatusChanges(false);
+        dto.setTicketComments(true);
+
+        when(notificationService.getPreferences(4L)).thenReturn(dto);
+        when(notificationService.updatePreferences(eq(4L), any(NotificationPreferencesDTO.class))).thenReturn(dto);
+
+        mockMvc.perform(get("/api/notifications/preferences"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.bookingUpdates").value(true))
+                .andExpect(jsonPath("$.ticketStatusChanges").value(false))
+                .andExpect(jsonPath("$.ticketComments").value(true));
+
+        mockMvc.perform(put("/api/notifications/preferences")
+                .contentType("application/json")
+                .content("{\"bookingUpdates\":true,\"ticketStatusChanges\":false,\"ticketComments\":true}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.bookingUpdates").value(true))
+                .andExpect(jsonPath("$.ticketStatusChanges").value(false))
+                .andExpect(jsonPath("$.ticketComments").value(true));
     }
 
     private User buildUser(Long id, String role, String email) {

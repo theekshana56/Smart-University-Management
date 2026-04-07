@@ -6,13 +6,27 @@ export default function NotificationsPage({ onLogout, user }) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [preferences, setPreferences] = useState({
+    bookingUpdates: true,
+    ticketStatusChanges: true,
+    ticketComments: true,
+  });
+  const [savingPrefs, setSavingPrefs] = useState(false);
 
   const load = async () => {
     setLoading(true);
     setError("");
     try {
-      const data = await notificationService.list();
+      const [data, prefData] = await Promise.all([
+        notificationService.list(),
+        notificationService.getPreferences(),
+      ]);
       setItems(Array.isArray(data) ? data : []);
+      setPreferences({
+        bookingUpdates: Boolean(prefData?.bookingUpdates),
+        ticketStatusChanges: Boolean(prefData?.ticketStatusChanges),
+        ticketComments: Boolean(prefData?.ticketComments),
+      });
     } catch (err) {
       setError(err.response?.data?.error || err.response?.data || "Failed to load notifications");
       setItems([]);
@@ -45,6 +59,25 @@ export default function NotificationsPage({ onLogout, user }) {
 
   const unreadCount = items.filter((item) => !(item.isRead ?? item.read)).length;
 
+  const updatePreference = async (key) => {
+    const next = { ...preferences, [key]: !preferences[key] };
+    setPreferences(next);
+    setSavingPrefs(true);
+    try {
+      const saved = await notificationService.updatePreferences(next);
+      setPreferences({
+        bookingUpdates: Boolean(saved?.bookingUpdates),
+        ticketStatusChanges: Boolean(saved?.ticketStatusChanges),
+        ticketComments: Boolean(saved?.ticketComments),
+      });
+    } catch (err) {
+      setError(err.response?.data?.error || err.response?.data || "Failed to update preferences");
+      setPreferences((prev) => ({ ...prev, [key]: !prev[key] }));
+    } finally {
+      setSavingPrefs(false);
+    }
+  };
+
   return (
     <ResourceLayout onLogout={onLogout} user={user}>
       <section className="card resourcePageHeader" style={{ width: "100%" }}>
@@ -58,6 +91,42 @@ export default function NotificationsPage({ onLogout, user }) {
       </section>
 
       <section className="card" style={{ width: "100%" }}>
+        <div className="card" style={{ marginBottom: 12 }}>
+          <h3 style={{ marginBottom: 10 }}>Notification Preferences</h3>
+          <div style={{ display: "grid", gap: 10, maxWidth: 420 }}>
+            {[
+              { key: "bookingUpdates", label: "Booking approval/rejection" },
+              { key: "ticketStatusChanges", label: "Ticket status changes" },
+              { key: "ticketComments", label: "New comments on your tickets" },
+            ].map((pref) => (
+              <label
+                key={pref.key}
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "18px 1fr",
+                  alignItems: "start",
+                  columnGap: 10,
+                  justifyItems: "start",
+                  cursor: "pointer",
+                  lineHeight: 1.3,
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={preferences[pref.key]}
+                  onChange={() => updatePreference(pref.key)}
+                  disabled={savingPrefs}
+                  style={{ marginTop: 2 }}
+                />
+                <span>{pref.label}</span>
+              </label>
+            ))}
+          </div>
+          <p className="muted" style={{ marginTop: 8, fontSize: 12 }}>
+            {savingPrefs ? "Saving preferences..." : "Changes apply immediately."}
+          </p>
+        </div>
+
         <div className="row" style={{ justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
           <strong>Unread: {unreadCount}</strong>
           <button className="btnMini" onClick={onMarkAllRead} disabled={items.length === 0 || unreadCount === 0}>

@@ -3,6 +3,7 @@ package com.smartcampus.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -19,6 +20,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.smartcampus.model.Auth.User;
 import com.smartcampus.model.Notification;
 import com.smartcampus.model.NotificationType;
+import com.smartcampus.repository.Auth.UserRepository;
 import com.smartcampus.repository.NotificationRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -27,6 +29,9 @@ class NotificationServiceTest {
 
     @Mock
     private NotificationRepository notificationRepository;
+
+    @Mock
+    private UserRepository userRepository;
 
     @InjectMocks
     private NotificationService notificationService;
@@ -75,11 +80,33 @@ class NotificationServiceTest {
         assertEquals(4, notificationService.markAllRead(3L));
     }
 
+    @Test
+    void createSkipsWhenPreferenceDisabled() {
+        User recipient = buildUser(7L);
+        recipient.setNotifyBookingUpdates(false);
+        recipient.setNotificationPreferencesCustomized(true);
+
+        Notification result = notificationService.create(
+                recipient,
+                NotificationType.BOOKING_APPROVED,
+                "Booking approved",
+                "Your booking has been approved.",
+                "BOOKING",
+                55L);
+
+        assertEquals(null, result);
+        verify(notificationRepository, never()).save(any(Notification.class));
+    }
+
     private User buildUser(Long id) {
         User user = new User();
         ReflectionTestUtils.setField(user, "id", id);
         user.setEmail("test@uni.lk");
         user.setRole("USER");
+        user.setNotifyBookingUpdates(true);
+        user.setNotifyTicketStatusChanges(true);
+        user.setNotifyTicketComments(true);
+        user.setNotificationPreferencesCustomized(true);
         return user;
     }
 }
