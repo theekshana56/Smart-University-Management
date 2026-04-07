@@ -16,9 +16,6 @@ const emptyForm = {
 };
 
 export default function ResourcesPage({ onLogout, user }) {
-  const managerRoles = new Set(["ADMIN", "STAFF", "LECTURER"]);
-  const canManageResources = managerRoles.has((user?.role || "").toUpperCase());
-
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState(emptyForm);
@@ -55,7 +52,6 @@ export default function ResourcesPage({ onLogout, user }) {
 
   const submit = async (e) => {
     e.preventDefault();
-    if (!canManageResources) return;
 
     const payload = { ...form, capacity: Number(form.capacity) };
 
@@ -71,7 +67,6 @@ export default function ResourcesPage({ onLogout, user }) {
   };
 
   const edit = (r) => {
-    if (!canManageResources) return;
     setEditingId(r.id);
     setForm({
       name: r.name,
@@ -85,7 +80,6 @@ export default function ResourcesPage({ onLogout, user }) {
   };
 
   const remove = async (id) => {
-    if (!canManageResources) return;
     if (!confirm("Delete this resource?")) return;
     await resourceService.remove(id);
     load();
@@ -93,47 +87,30 @@ export default function ResourcesPage({ onLogout, user }) {
 
   return (
     <ResourceLayout onLogout={onLogout} user={user}>
-      <section className="card resourcePageHeader">
-        <div>
-          <h1 className="resourcePageTitle">Campus Resources</h1>
-          <p className="resourcePageSubtitle">
-            Centralized view of all learning spaces and equipment across campus.
-          </p>
-        </div>
-        <span className={canManageResources ? "roleBadge manager" : "roleBadge viewer"}>
-          {canManageResources ? "Manager Access" : "View Only"}
-        </span>
-      </section>
 
       <ResourceStats items={items} />
       <ResourceChart items={items} />
 
-      <div className="resourceSplit">
-        <section className="resourceManagePanel">
-          <div className="card resourceSectionIntro">
-            <h2 className="resourceSectionTitle">Resources</h2>
-            <p className="resourceSectionText">
-            {canManageResources
-              ? "Add / update / delete and filter campus resources."
-              : "View and filter campus resources. Resource management is limited to admin, staff, and lecturer roles."}
-            </p>
-          </div>
+      <div style={{ display: "flex", gap: 18, flexWrap: "wrap" }}>
+        <div style={{ flex: "1 1 360px" }}>
+          <h2 style={{ margin: 0 }}>Resources</h2>
+          <p style={{ marginTop: 6, color: "var(--muted)" }}>
+            Add / update / delete and filter campus resources.
+          </p>
 
-          {canManageResources ? (
-            <ResourceForm
-              form={form}
-              setForm={setForm}
-              onSubmit={submit}
-              editingId={editingId}
-              onCancelEdit={() => {
-                setEditingId(null);
-                setForm(emptyForm);
-              }}
-            />
-          ) : null}
-        </section>
+          <ResourceForm
+            form={form}
+            setForm={setForm}
+            onSubmit={submit}
+            editingId={editingId}
+            onCancel={() => {
+              setEditingId(null);
+              setForm(emptyForm);
+            }}
+          />
+        </div>
 
-        <section className="resourceListPanel">
+        <div style={{ flex: "2 1 600px" }}>
           <ResourceList
             items={items}
             loading={loading}
@@ -141,9 +118,8 @@ export default function ResourcesPage({ onLogout, user }) {
             setFilters={setFilters}
             onEdit={edit}
             onDelete={remove}
-            canManageResources={canManageResources}
           />
-        </section>
+        </div>
       </div>
     </ResourceLayout>
   );

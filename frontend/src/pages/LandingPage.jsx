@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import BrandLogo from "../components/common/BrandLogo.jsx";
 import homeIcon from "../Assests/home.png";
@@ -9,18 +10,61 @@ import notificationsIcon from "../Assests/notification.png";
 import profileIcon from "../Assests/profile.svg";
 import settingsIcon from "../Assests/Setting.png";
 import "./landing.css";
+import { notificationService } from "../services/notificationService.js";
 
 export default function LandingPage({ user, onLogout }) {
   const isAuthenticated = Boolean(user);
   const managerRoles = new Set(["ADMIN", "STAFF", "LECTURER"]);
   const canManageResources = managerRoles.has((user?.role || "").toUpperCase());
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [navOpen, setNavOpen] = useState(false);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    let isMounted = true;
+
+    const loadUnread = async () => {
+      try {
+        const count = await notificationService.unreadCount();
+        if (isMounted) setUnreadCount(Number(count) || 0);
+      } catch (error) {
+        if (isMounted) setUnreadCount(0);
+      }
+    };
+
+    loadUnread();
+    const interval = setInterval(loadUnread, 30000);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, [isAuthenticated, user?.id]);
+
+  const handleNavItemClick = () => {
+    if (typeof window !== "undefined" && window.innerWidth <= 900) {
+      setNavOpen(false);
+    }
+  };
 
   return (
     <div className="landingPage">
-      <aside className={isAuthenticated ? "landingSideNav landingSideNavAuth" : "landingSideNav"}>
+      <aside
+        className={`${isAuthenticated ? "landingSideNav landingSideNavAuth" : "landingSideNav"} ${
+          navOpen ? "navOpen" : ""
+        }`}
+      >
         <a href="#home" className="landingBrand" aria-label="Smart University home">
           <BrandLogo className="landingBrandLogo" />
         </a>
+        <button
+          type="button"
+          className="landingMenuToggle"
+          onClick={() => setNavOpen((prev) => !prev)}
+          aria-expanded={navOpen}
+          aria-label="Toggle navigation menu"
+        >
+          {navOpen ? "Close Menu" : "Menu"}
+        </button>
 
         {isAuthenticated ? (
           <div className="landingProfile">
@@ -61,6 +105,7 @@ export default function LandingPage({ user, onLogout }) {
                 className={({ isActive }) =>
                   isActive ? "landingNavLink active" : "landingNavLink"
                 }
+                onClick={handleNavItemClick}
               >
                 <img src={homeIcon} alt="" className="landingNavIcon" />
                 <span className="landingNavLabel">Home</span>
@@ -71,6 +116,7 @@ export default function LandingPage({ user, onLogout }) {
                   className={({ isActive }) =>
                     isActive ? "landingNavLink active" : "landingNavLink"
                   }
+                  onClick={handleNavItemClick}
                 >
                   <img src={adminIcon} alt="" className="landingNavIcon" />
                   <span className="landingNavLabel">Admin Dashboard</span>
@@ -81,6 +127,7 @@ export default function LandingPage({ user, onLogout }) {
                 className={({ isActive }) =>
                   isActive ? "landingNavLink active" : "landingNavLink"
                 }
+                onClick={handleNavItemClick}
               >
                 <img src={resourcesIcon} alt="" className="landingNavIcon" />
                 <span className="landingNavLabel">Resources</span>
@@ -90,6 +137,7 @@ export default function LandingPage({ user, onLogout }) {
                 className={({ isActive }) =>
                   isActive ? "landingNavLink active" : "landingNavLink"
                 }
+                onClick={handleNavItemClick}
               >
                 <img src={bookingsIcon} alt="" className="landingNavIcon" />
                 <span className="landingNavLabel">Bookings</span>
@@ -99,6 +147,7 @@ export default function LandingPage({ user, onLogout }) {
                 className={({ isActive }) =>
                   isActive ? "landingNavLink active" : "landingNavLink"
                 }
+                onClick={handleNavItemClick}
               >
                 <img src={ticketsIcon} alt="" className="landingNavIcon" />
                 <span className="landingNavLabel">Tickets</span>
@@ -108,8 +157,14 @@ export default function LandingPage({ user, onLogout }) {
                 className={({ isActive }) =>
                   isActive ? "landingNavLink active" : "landingNavLink"
                 }
+                onClick={handleNavItemClick}
               >
-                <img src={notificationsIcon} alt="" className="landingNavIcon" />
+                <span className="landingNavIconWrap">
+                  <img src={notificationsIcon} alt="" className="landingNavIcon" />
+                  {unreadCount > 0 ? (
+                    <span className="landingNotifyBadge">{unreadCount > 99 ? "99+" : unreadCount}</span>
+                  ) : null}
+                </span>
                 <span className="landingNavLabel">Notifications</span>
               </NavLink>
               <NavLink
@@ -117,6 +172,7 @@ export default function LandingPage({ user, onLogout }) {
                 className={({ isActive }) =>
                   isActive ? "landingNavLink active" : "landingNavLink"
                 }
+                onClick={handleNavItemClick}
               >
                 <img src={profileIcon} alt="" className="landingNavIcon" />
                 <span className="landingNavLabel">Profile</span>
@@ -127,6 +183,7 @@ export default function LandingPage({ user, onLogout }) {
                   className={({ isActive }) =>
                     isActive ? "landingNavLink active" : "landingNavLink"
                   }
+                  onClick={handleNavItemClick}
                 >
                   <img src={profileIcon} alt="" className="landingNavIcon" />
                   <span className="landingNavLabel">Manage Users</span>
@@ -138,6 +195,7 @@ export default function LandingPage({ user, onLogout }) {
                   className={({ isActive }) =>
                     isActive ? "landingNavLink active" : "landingNavLink"
                   }
+                  onClick={handleNavItemClick}
                 >
                   <img src={settingsIcon} alt="" className="landingNavIcon" />
                   <span className="landingNavLabel">Settings</span>
@@ -146,16 +204,16 @@ export default function LandingPage({ user, onLogout }) {
             </>
           ) : (
             <>
-              <a href="#home" className="landingNavLink active">
+              <a href="#home" className="landingNavLink active" onClick={handleNavItemClick}>
                 Home
               </a>
-              <a href="#about" className="landingNavLink">
+              <a href="#about" className="landingNavLink" onClick={handleNavItemClick}>
                 About Us
               </a>
-              <a href="#features" className="landingNavLink">
+              <a href="#features" className="landingNavLink" onClick={handleNavItemClick}>
                 Features
               </a>
-              <a href="#contact" className="landingNavLink">
+              <a href="#contact" className="landingNavLink" onClick={handleNavItemClick}>
                 Contact
               </a>
             </>

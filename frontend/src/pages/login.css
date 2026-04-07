@@ -4,8 +4,8 @@
   place-items: center;
   padding: 24px;
   background:
-    radial-gradient(1200px 360px at 50% 110%, rgba(75, 75, 75, 0.28), transparent 70%),
-    linear-gradient(180deg, var(--bg) 0%, #a8a9aa 100%);
+    radial-gradient(1200px 360px at 50% 110%, rgba(255, 255, 255, 0.28), transparent 70%),
+    linear-gradient(180deg, var(--bg) 0%, #c7ccd6 100%);
 }
 
 .loginCard {
@@ -16,27 +16,6 @@
   box-shadow: 0 20px 40px rgba(15, 23, 42, 0.14);
   backdrop-filter: blur(4px);
   padding: 22px 20px 18px;
-  position: relative;
-}
-
-.loginBackBtn {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  border: 1px solid var(--border);
-  background: linear-gradient(180deg, #ffffff, #eef2f7);
-  color: var(--text);
-  border-radius: 10px;
-  padding: 6px 10px;
-  font-size: 12px;
-  font-weight: 700;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.loginBackBtn:hover {
-  background: linear-gradient(180deg, #f8fafc, #e5ebf3);
 }
 
 .loginBrand {

@@ -218,6 +218,34 @@
   filter: brightness(0) saturate(100%);
 }
 
+.sideNavIconWrap {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.notifyBadge {
+  position: absolute;
+  top: -8px;
+  right: -10px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: #dc2626;
+  color: #fff;
+  font-size: 10px;
+  line-height: 16px;
+  text-align: center;
+  font-weight: 700;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
 .sideNavLabel {
   opacity: 0;
   transform: translateX(-8px);
@@ -226,8 +254,6 @@
   white-space: nowrap;
   transition: opacity 0.2s ease, transform 0.22s ease, max-width 0.22s ease;
   font-size: 15px;
-  font-weight: 800;
-  letter-spacing: 0.2px;
 }
 
 .sideNav:hover .sideNavLabel {
@@ -333,21 +359,118 @@
   padding: 18px 20px;
 }
 
+@media (max-width: 1200px) {
+  .sideNav:hover {
+    width: 236px;
+  }
+
+  .content {
+    padding: 22px 24px;
+  }
+}
+
 @media (max-width: 960px) {
+  .appShell {
+    flex-direction: column;
+    min-height: 100dvh;
+  }
+
   .sideNav {
-    width: 74px;
+    width: auto;
+    margin: 12px;
+    border-radius: 16px;
+    padding: 12px 10px;
+    gap: 10px;
   }
 
   .sideNav:hover {
-    width: 74px;
+    width: auto;
+  }
+
+  .sideProfile {
+    justify-content: flex-start;
+    gap: 10px;
+    padding: 8px;
   }
 
   .sideProfileText,
   .sideNavLabel {
-    display: none;
+    opacity: 1;
+    transform: none;
+    max-width: 220px;
+  }
+
+  .sideNavMenu {
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 4px;
+    margin-top: 0;
+    scrollbar-width: thin;
+  }
+
+  .sideNavItem {
+    flex: 0 0 auto;
+    min-width: 150px;
+    justify-content: flex-start;
+    padding: 8px 10px;
+    gap: 10px;
+  }
+
+  .sideNav:not(:hover) .sideNavItem {
+    justify-content: flex-start;
+    padding-left: 10px;
+    padding-right: 10px;
+    gap: 10px;
+  }
+
+  .logout {
+    margin-top: 2px;
+    padding-top: 4px;
+  }
+
+  .sideLogout {
+    justify-content: center;
   }
 
   .content {
-    padding: 18px 16px;
+    padding: 14px 12px 18px;
+  }
+
+  .contentInner {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .sideNav {
+    margin: 10px 8px;
+    padding: 10px 8px;
+  }
+
+  .sideProfile {
+    display: none;
+  }
+
+  .sideNavMenu {
+    gap: 6px;
+  }
+
+  .sideNavItem {
+    min-width: 136px;
+  }
+
+  .sideNavLabel {
+    font-size: 14px;
+    max-width: 140px;
+  }
+
+  .content {
+    padding: 10px 8px 14px;
+  }
+
+  .card {
+    border-radius: 14px;
+    padding: 14px;
   }
 }

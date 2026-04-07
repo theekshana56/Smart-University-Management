@@ -7,6 +7,7 @@ import com.smartcampus.model.Comment;
 import com.smartcampus.model.Auth.User;
 import com.smartcampus.model.Ticket;
 import com.smartcampus.model.TicketAttachment;
+import com.smartcampus.model.NotificationType;
 import com.smartcampus.model.TicketStatus;
 import com.smartcampus.repository.Auth.UserRepository;
 import com.smartcampus.repository.CommentRepository;
@@ -20,14 +21,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
+@SuppressWarnings("null")
 public class TicketService {
     private final TicketRepository ticketRepository;
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
     private final FileStorageService fileStorageService;
+    private final NotificationService notificationService;
 
     @Transactional
     public Ticket createTicket(User creator, TicketRequestDTO request) {
@@ -87,11 +91,22 @@ public class TicketService {
             String reason = requireText(request.getRejectionReason(), "Rejection reason is required");
             ticket.setStatus(TicketStatus.REJECTED);
             ticket.setRejectionReason(reason);
-            return ticketRepository.save(ticket);
+            Ticket saved = ticketRepository.save(ticket);
+            notificationService.create(
+                    saved.getCreatedBy(),
+                    NotificationType.TICKET_STATUS_CHANGED,
+                    "Ticket status updated",
+                    "Your ticket #" + saved.getId() + " status changed to " + saved.getStatus().name()
+                            + ". Reason: " + reason,
+                    "TICKET",
+                    saved.getId());
+            return saved;
         }
 
         if ("TECHNICIAN".equalsIgnoreCase(actor.getRole())) {
-            if (ticket.getAssignedTechnician() == null || !ticket.getAssignedTechnician().getId().equals(actor.getId())) {
+            if (ticket.getAssignedTechnician() == null
+                    || !Objects.requireNonNull(ticket.getAssignedTechnician().getId(), "Assigned technician id is required")
+                            .equals(Objects.requireNonNull(actor.getId(), "Actor id is required"))) {
                 throw new IllegalArgumentException("You can only update tickets assigned to you");
             }
             if (nextStatus == TicketStatus.IN_PROGRESS && ticket.getStatus() == TicketStatus.OPEN) {
@@ -102,12 +117,28 @@ public class TicketService {
             } else {
                 throw new IllegalArgumentException("Invalid technician transition");
             }
-            return ticketRepository.save(ticket);
+            Ticket saved = ticketRepository.save(ticket);
+            notificationService.create(
+                    saved.getCreatedBy(),
+                    NotificationType.TICKET_STATUS_CHANGED,
+                    "Ticket status updated",
+                    "Your ticket #" + saved.getId() + " status changed to " + saved.getStatus().name() + ".",
+                    "TICKET",
+                    saved.getId());
+            return saved;
         }
 
         if ("ADMIN".equalsIgnoreCase(actor.getRole()) && nextStatus == TicketStatus.CLOSED && ticket.getStatus() == TicketStatus.RESOLVED) {
             ticket.setStatus(TicketStatus.CLOSED);
-            return ticketRepository.save(ticket);
+            Ticket saved = ticketRepository.save(ticket);
+            notificationService.create(
+                    saved.getCreatedBy(),
+                    NotificationType.TICKET_STATUS_CHANGED,
+                    "Ticket status updated",
+                    "Your ticket #" + saved.getId() + " status changed to " + saved.getStatus().name() + ".",
+                    "TICKET",
+                    saved.getId());
+            return saved;
         }
 
         throw new IllegalArgumentException("You do not have permission to perform this status update");
@@ -120,7 +151,18 @@ public class TicketService {
         comment.setTicket(ticket);
         comment.setAuthor(actor);
         comment.setContent(requireText(content, "Comment content is required"));
-        return commentRepository.save(comment);
+        Comment saved = commentRepository.save(Objects.requireNonNull(comment, "Comment is required"));
+        if (!Objects.requireNonNull(ticket.getCreatedBy().getId(), "Ticket owner id is required")
+                .equals(Objects.requireNonNull(actor.getId(), "Actor id is required"))) {
+            notificationService.create(
+                    ticket.getCreatedBy(),
+                    NotificationType.TICKET_COMMENT_ADDED,
+                    "New comment on your ticket",
+                    actor.getName() + " commented on ticket #" + ticket.getId() + ".",
+                    "TICKET",
+                    ticket.getId());
+        }
+        return saved;
     }
 
     public List<Comment> listComments(Long ticketId) {
