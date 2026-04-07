@@ -5,6 +5,8 @@ import AppLoader from "../components/common/AppLoader.jsx";
 import BrandLogo from "../components/common/BrandLogo.jsx";
 import "./login.css";
 
+const AUTH_HEADER_STORAGE_KEY = "sum_auth_header";
+
 export default function LoginPage({ onLogin }) {
   const [isLogin, setIsLogin] = useState(true);
   const [name, setName] = useState("");
@@ -31,6 +33,7 @@ export default function LoginPage({ onLogin }) {
 
         axios.defaults.headers.common["Authorization"] = authHeader;
         apiClient.defaults.headers.common["Authorization"] = authHeader;
+        localStorage.setItem(AUTH_HEADER_STORAGE_KEY, authHeader);
         onLogin(response.data);
       } else {
         const response = await axios.post("http://localhost:8085/api/auth/signup", {
