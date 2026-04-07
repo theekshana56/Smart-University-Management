@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import BrandLogo from "../components/common/BrandLogo.jsx";
 import homeIcon from "../Assests/home.png";
@@ -9,11 +10,34 @@ import notificationsIcon from "../Assests/notification.png";
 import profileIcon from "../Assests/profile.svg";
 import settingsIcon from "../Assests/Setting.png";
 import "./landing.css";
+import { notificationService } from "../services/notificationService.js";
 
 export default function LandingPage({ user, onLogout }) {
   const isAuthenticated = Boolean(user);
   const managerRoles = new Set(["ADMIN", "STAFF", "LECTURER"]);
   const canManageResources = managerRoles.has((user?.role || "").toUpperCase());
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    let isMounted = true;
+
+    const loadUnread = async () => {
+      try {
+        const count = await notificationService.unreadCount();
+        if (isMounted) setUnreadCount(Number(count) || 0);
+      } catch (error) {
+        if (isMounted) setUnreadCount(0);
+      }
+    };
+
+    loadUnread();
+    const interval = setInterval(loadUnread, 30000);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, [isAuthenticated, user?.id]);
 
   return (
     <div className="landingPage">
@@ -110,7 +134,9 @@ export default function LandingPage({ user, onLogout }) {
                 }
               >
                 <img src={notificationsIcon} alt="" className="landingNavIcon" />
-                <span className="landingNavLabel">Notifications</span>
+                <span className="landingNavLabel">
+                  Notifications{unreadCount > 0 ? ` (${unreadCount})` : ""}
+                </span>
               </NavLink>
               <NavLink
                 to="/profile"

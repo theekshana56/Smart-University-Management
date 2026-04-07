@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import "./resource.css";
 
@@ -10,8 +11,32 @@ import notificationsIcon from "../../Assests/notification.png";
 import profileIcon from "../../Assests/profile.svg";
 import settingsIcon from "../../Assests/Setting.png";
 import BrandLogo from "../common/BrandLogo.jsx";
+import { notificationService } from "../../services/notificationService.js";
 
 export default function ResourceLayout({ children, onLogout, user }) {
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    if (!user) return;
+    let isMounted = true;
+
+    const loadUnread = async () => {
+      try {
+        const count = await notificationService.unreadCount();
+        if (isMounted) setUnreadCount(Number(count) || 0);
+      } catch (error) {
+        if (isMounted) setUnreadCount(0);
+      }
+    };
+
+    loadUnread();
+    const interval = setInterval(loadUnread, 30000);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, [user?.id]);
+
   return (
     <div className="appShell">
       <aside className="sideNav">
@@ -100,7 +125,9 @@ export default function ResourceLayout({ children, onLogout, user }) {
             }
           >
             <img src={notificationsIcon} alt="" className="sideNavIcon" />
-            <span className="sideNavLabel">Notifications</span>
+            <span className="sideNavLabel">
+              Notifications{unreadCount > 0 ? ` (${unreadCount})` : ""}
+            </span>
           </NavLink>
           <NavLink
             to="/profile"
