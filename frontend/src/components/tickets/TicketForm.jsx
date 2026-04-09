@@ -1,6 +1,14 @@
 import { useState } from "react";
 
-export default function TicketForm({ onCreate }) {
+function formatResourceOption(resource) {
+  if (!resource) return "";
+  const name = String(resource.name || "").trim();
+  const location = String(resource.location || "").trim();
+  if (name && location) return `${name} - ${location}`;
+  return name || location || "";
+}
+
+export default function TicketForm({ onCreate, resources = [] }) {
   const [form, setForm] = useState({
     resourceLocation: "",
     category: "",
@@ -43,7 +51,22 @@ export default function TicketForm({ onCreate }) {
 
   return (
     <form onSubmit={submit} style={{ display: "grid", gap: 8 }}>
-      <input className="input" placeholder="Resource / Location" value={form.resourceLocation} onChange={(e) => setForm((p) => ({ ...p, resourceLocation: e.target.value }))} required />
+      <select
+        className="input"
+        value={form.resourceLocation}
+        onChange={(e) => setForm((p) => ({ ...p, resourceLocation: e.target.value }))}
+        required
+      >
+        <option value="">Select resource / location</option>
+        {resources.map((resource) => {
+          const label = formatResourceOption(resource);
+          return label ? (
+            <option key={resource.id} value={label}>
+              {label}
+            </option>
+          ) : null;
+        })}
+      </select>
       <input className="input" placeholder="Category" value={form.category} onChange={(e) => setForm((p) => ({ ...p, category: e.target.value }))} required />
       <textarea className="input" rows={3} placeholder="Description" value={form.description} onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))} required />
       <select className="input" value={form.priority} onChange={(e) => setForm((p) => ({ ...p, priority: e.target.value }))}>
