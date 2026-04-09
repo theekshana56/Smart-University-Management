@@ -10,6 +10,24 @@ export default function TicketForm({ onCreate }) {
     images: [],
   });
 
+  const handleImageSelection = (e) => {
+    const selected = Array.from(e.target.files || []);
+    setForm((prev) => {
+      const merged = [...prev.images];
+      for (const file of selected) {
+        const exists = merged.some(
+          (f) =>
+            f.name === file.name &&
+            f.size === file.size &&
+            f.lastModified === file.lastModified
+        );
+        if (!exists) merged.push(file);
+      }
+      return { ...prev, images: merged.slice(0, 3) };
+    });
+    e.target.value = "";
+  };
+
   const submit = (e) => {
     e.preventDefault();
     onCreate(form);
@@ -32,7 +50,16 @@ export default function TicketForm({ onCreate }) {
         <option value="LOW">LOW</option><option value="MEDIUM">MEDIUM</option><option value="HIGH">HIGH</option><option value="CRITICAL">CRITICAL</option>
       </select>
       <input className="input" placeholder="Preferred contact details" value={form.preferredContact} onChange={(e) => setForm((p) => ({ ...p, preferredContact: e.target.value }))} required />
-      <input className="input" type="file" accept="image/*" multiple onChange={(e) => setForm((p) => ({ ...p, images: Array.from(e.target.files || []).slice(0, 3) }))} />
+      <input
+        className="input"
+        type="file"
+        accept="image/*"
+        multiple
+        onChange={handleImageSelection}
+      />
+      <small style={{ color: "var(--text-muted)" }}>
+        Up to 3 images. Selected: {form.images.length}/3
+      </small>
       <button className="btnPrimary" type="submit">Create Ticket</button>
     </form>
   );
