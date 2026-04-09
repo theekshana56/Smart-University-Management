@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import ResourceLayout from "../components/resource/ResourceLayout";
 import { ticketService } from "../services/ticketService";
+import { resourceService } from "../services/resourceService";
 import TechnicianDashboard from "./TechnicianDashboard";
 import AdminTicketManager from "./AdminTicketManager";
 import TicketForm from "../components/tickets/TicketForm";
@@ -10,6 +11,7 @@ export default function TicketsPage({ onLogout, user }) {
   const [tickets, setTickets] = useState([]);
   const [commentsByTicket, setCommentsByTicket] = useState({});
   const [commentDrafts, setCommentDrafts] = useState({});
+  const [resources, setResources] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -51,6 +53,7 @@ export default function TicketsPage({ onLogout, user }) {
 
   useEffect(() => {
     loadTickets();
+    resourceService.list().then((data) => setResources(Array.isArray(data) ? data : [])).catch(() => setResources([]));
   }, []);
 
   const createTicket = async (form) => {
@@ -90,7 +93,7 @@ export default function TicketsPage({ onLogout, user }) {
         <div className="card">
           <h2 style={{ marginTop: 0 }}>Incident Ticketing</h2>
           {error ? <div style={{ color: "#b71c1c", marginBottom: 8 }}>{String(error)}</div> : null}
-          <TicketForm onCreate={createTicket} />
+          <TicketForm onCreate={createTicket} resources={resources} />
         </div>
 
         <div className="card">
