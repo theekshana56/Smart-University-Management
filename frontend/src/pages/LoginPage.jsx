@@ -6,6 +6,8 @@ import BrandLogo from "../components/common/BrandLogo.jsx";
 import "./login.css";
 
 const AUTH_HEADER_STORAGE_KEY = "sum_auth_header";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8085/api";
+const BACKEND_BASE_URL = API_BASE_URL.replace(/\/api\/?$/, "");
 
 export default function LoginPage({ onLogin }) {
   const [isLogin, setIsLogin] = useState(true);
@@ -27,7 +29,7 @@ export default function LoginPage({ onLogin }) {
       if (isLogin) {
         const authHeader = "Basic " + btoa(email + ":" + password);
 
-        const response = await axios.get("http://localhost:8085/api/auth/me", {
+        const response = await axios.get(`${API_BASE_URL}/auth/me`, {
           headers: { Authorization: authHeader },
         });
 
@@ -36,7 +38,7 @@ export default function LoginPage({ onLogin }) {
         localStorage.setItem(AUTH_HEADER_STORAGE_KEY, authHeader);
         onLogin(response.data);
       } else {
-        const response = await axios.post("http://localhost:8085/api/auth/signup", {
+        const response = await axios.post(`${API_BASE_URL}/auth/signup`, {
           name,
           email,
           password,
@@ -185,7 +187,7 @@ export default function LoginPage({ onLogin }) {
             <button
               type="button"
               onClick={() => {
-                window.location.href = "http://localhost:8085/oauth2/authorization/google";
+                window.location.href = `${BACKEND_BASE_URL}/oauth2/authorization/google`;
               }}
               className="loginGoogleBtn"
             >

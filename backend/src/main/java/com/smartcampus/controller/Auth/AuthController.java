@@ -203,6 +203,7 @@ public class AuthController {
             if (userOpt.isPresent()) {
                 User user = userOpt.get();
                 return new LoginResponse(
+                        user.getId(),
                         user.getName(),
                         user.getEmail(),
                         user.getRole(),
@@ -212,6 +213,7 @@ public class AuthController {
         }
 
         return new LoginResponse(
+                null,
                 nameFallback,
                 email,
                 "USER",
@@ -265,6 +267,7 @@ public class AuthController {
         userRepository.save(user);
 
         return ResponseEntity.ok(new LoginResponse(
+                user.getId(),
                 user.getName(),
                 user.getEmail(),
                 user.getRole(),
