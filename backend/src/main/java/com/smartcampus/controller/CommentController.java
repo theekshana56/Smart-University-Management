@@ -22,11 +22,19 @@ public class CommentController {
     private final UserRepository userRepository;
 
     @GetMapping("/{id}/comments")
-    public ResponseEntity<?> listComments(@PathVariable Long id) {
-        List<Map<String, Object>> comments = ticketService.listComments(id).stream()
-                .map(ticketService::toCommentResponse)
-                .toList();
-        return ResponseEntity.ok(comments);
+    public ResponseEntity<?> listComments(@PathVariable Long id, Authentication authentication) {
+        try {
+            User actor = currentUser(authentication);
+            List<Map<String, Object>> comments = ticketService.listComments(id, actor).stream()
+                    .map(ticketService::toCommentResponse)
+                    .toList();
+            return ResponseEntity.ok(comments);
+        } catch (IllegalArgumentException ex) {
+            if ("Forbidden".equalsIgnoreCase(ex.getMessage()) || "Unauthorized".equalsIgnoreCase(ex.getMessage())) {
+                return ResponseEntity.status(403).body(ex.getMessage());
+            }
+            return ResponseEntity.badRequest().body(ex.getMessage());
+        }
     }
 
     @PostMapping("/{id}/comments")
@@ -38,6 +46,9 @@ public class CommentController {
             Comment comment = ticketService.addComment(id, payload.get("content"), actor);
             return ResponseEntity.ok(ticketService.toCommentResponse(comment));
         } catch (IllegalArgumentException ex) {
+            if ("Forbidden".equalsIgnoreCase(ex.getMessage()) || "Unauthorized".equalsIgnoreCase(ex.getMessage())) {
+                return ResponseEntity.status(403).body(ex.getMessage());
+            }
             return ResponseEntity.badRequest().body(ex.getMessage());
         }
     }
@@ -51,6 +62,9 @@ public class CommentController {
             Comment comment = ticketService.updateComment(commentId, payload.get("content"), actor);
             return ResponseEntity.ok(ticketService.toCommentResponse(comment));
         } catch (IllegalArgumentException ex) {
+            if ("Forbidden".equalsIgnoreCase(ex.getMessage()) || "Unauthorized".equalsIgnoreCase(ex.getMessage())) {
+                return ResponseEntity.status(403).body(ex.getMessage());
+            }
             return ResponseEntity.badRequest().body(ex.getMessage());
         }
     }
@@ -62,6 +76,9 @@ public class CommentController {
             ticketService.deleteComment(commentId, actor);
             return ResponseEntity.ok(Map.of("message", "Comment deleted"));
         } catch (IllegalArgumentException ex) {
+            if ("Forbidden".equalsIgnoreCase(ex.getMessage()) || "Unauthorized".equalsIgnoreCase(ex.getMessage())) {
+                return ResponseEntity.status(403).body(ex.getMessage());
+            }
             return ResponseEntity.badRequest().body(ex.getMessage());
         }
     }
