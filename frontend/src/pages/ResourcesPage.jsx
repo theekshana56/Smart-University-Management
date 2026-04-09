@@ -15,8 +15,10 @@ const emptyForm = {
   availabilityWindows: "AVAILABLE",
 };
 
-export default function ResourcesPage() {
+export default function ResourcesPage({ onLogout, user }) {
+
   const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
 
@@ -28,25 +30,28 @@ export default function ResourcesPage() {
     location: "",
   });
 
-  // 🔄 LOAD DATA
   const load = async () => {
-    const params = {};
+    setLoading(true);
 
+    const params = {};
     if (filters.q) params.q = filters.q;
     if (filters.type) params.type = filters.type;
     if (filters.status) params.status = filters.status;
     if (filters.minCap) params.minCap = Number(filters.minCap);
     if (filters.location) params.location = filters.location;
 
-    const data = await resourceService.list(params);
-    setItems(data);
+    try {
+      const data = await resourceService.list(params);
+      setItems(data);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     load();
   }, [filters.q, filters.type, filters.status, filters.minCap, filters.location]);
 
-  // ✅ SUBMIT (WITH CONFLICT DETECTION)
   const submit = async (e) => {
     e.preventDefault();
 
@@ -71,7 +76,6 @@ export default function ResourcesPage() {
     load();
   };
 
-  // ✏️ EDIT
   const edit = (r) => {
     setEditingId(r.id);
     setForm({
@@ -86,7 +90,6 @@ export default function ResourcesPage() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // ❌ DELETE (SOFT DELETE)
   const remove = async (id) => {
     if (!confirm("Delete this resource?")) return;
     await resourceService.remove(id);
@@ -94,44 +97,41 @@ export default function ResourcesPage() {
   };
 
   return (
-    <ResourceLayout>
+    <ResourceLayout onLogout={onLogout} user={user}>
 
-      {/* 📊 DASHBOARD */}
       <ResourceStats items={items} />
       <ResourceChart items={items} />
 
       <div style={{ display: "flex", gap: 18, flexWrap: "wrap" }}>
-
-        {/* LEFT SIDE - FORM */}
+        
+        {/* FORM */}
         <div style={{ flex: "1 1 360px" }}>
-          <h2 style={{ margin: 0 }}>Resources</h2>
-          <p style={{ marginTop: 6, color: "var(--muted)" }}>
-            Add / update / delete and manage campus resources.
-          </p>
+          <h2>Resources</h2>
+          <p>Add / update / delete resources</p>
 
           <ResourceForm
             form={form}
             setForm={setForm}
             onSubmit={submit}
             editingId={editingId}
-            onCancelEdit={() => {
+            onCancel={() => {
               setEditingId(null);
               setForm(emptyForm);
             }}
           />
         </div>
 
-        {/* RIGHT SIDE - TABLE */}
+        {/* LIST */}
         <div style={{ flex: "2 1 600px" }}>
           <ResourceList
             items={items}
+            loading={loading}
             filters={filters}
             setFilters={setFilters}
             onEdit={edit}
             onDelete={remove}
           />
         </div>
-
       </div>
     </ResourceLayout>
   );

@@ -10,6 +10,8 @@ const TYPE_CONFIG = {
   EQUIPMENT:    { icon: "📷", label: "Equipment",    cls: "equipment" },
 };
 
+const MAX_CAPACITY = 200;
+
 export default function ResourceList({ items, filters, setFilters, onEdit, onDelete }) {
 
   const [selected, setSelected] = useState([]);
@@ -128,6 +130,7 @@ export default function ResourceList({ items, filters, setFilters, onEdit, onDel
               ) : (
                 items.map((r) => {
                   const status = getStatus(r);
+                  const capPct = Math.min((r.capacity / MAX_CAPACITY) * 100, 100);
 
                   return (
                     <tr key={r.id}>
@@ -152,6 +155,11 @@ export default function ResourceList({ items, filters, setFilters, onEdit, onDel
                         <span style={{ fontSize: "13px", fontWeight: "600" }}>
                           {r.capacity ?? "—"}
                         </span>
+                        {r.capacity > 0 && (
+                          <div className="capBar">
+                            <div className="capBarFill" style={{ width: `${capPct}%` }} />
+                          </div>
+                        )}
                       </td>
 
                       <td style={{ fontSize: "13px", color: "var(--muted)" }}>
