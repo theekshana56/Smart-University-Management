@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import ResourceLayout from '../components/resource/ResourceLayout.jsx';
 import { apiClient } from '../api/apiClient';
+import { confirmPopup, showErrorPopup } from '../utils/popup';
 
 export default function AdminPage({ onLogout, user, onNavigate }) {
     const [users, setUsers] = useState([]);
@@ -32,18 +33,26 @@ export default function AdminPage({ onLogout, user, onNavigate }) {
             fetchUsers();
         } catch (err) {
             console.error('Error changing role:', err);
-            alert('Failed to change role');
+            await showErrorPopup('Role update failed', 'Failed to change role.');
         }
     };
 
     const deleteUser = async (userId) => {
-        if (!window.confirm('Are you sure you want to delete this user?')) return;
+        const confirmed = await confirmPopup({
+            title: 'Delete this user?',
+            text: 'This action cannot be undone.',
+            confirmButtonText: 'Yes, delete',
+            cancelButtonText: 'Cancel',
+            icon: 'warning',
+        });
+        if (!confirmed) return;
+
         try {
             await apiClient.delete(`/admin/users/${userId}`);
             fetchUsers();
         } catch (err) {
             console.error('Error deleting user:', err);
-            alert('Failed to delete user');
+            await showErrorPopup('Delete failed', 'Failed to delete user.');
         }
     };
 

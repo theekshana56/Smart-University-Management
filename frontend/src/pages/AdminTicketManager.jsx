@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { ticketService } from "../services/ticketService";
 import { adminUserService } from "../services/adminUserService";
 import TicketTable from "../components/tickets/TicketTable";
+import { confirmPopup, promptPopup } from "../utils/popup";
 
 export default function AdminTicketManager({ user }) {
   const [tickets, setTickets] = useState([]);
@@ -82,8 +83,32 @@ export default function AdminTicketManager({ user }) {
         onStatus={async () => {}}
         onCommentDraft={(ticketId, value) => setCommentDrafts((p) => ({ ...p, [ticketId]: value }))}
         onCommentPost={async (ticketId) => { await ticketService.addComment(ticketId, commentDrafts[ticketId] || ""); setCommentDrafts((p) => ({ ...p, [ticketId]: "" })); await load(); }}
-        onCommentEdit={async (comment) => { const v = window.prompt("Edit comment", comment.content); if (v !== null) { await ticketService.updateComment(comment.id, v); await load(); } }}
-        onCommentDelete={async (commentId) => { if (window.confirm("Delete this comment?")) { await ticketService.deleteComment(commentId); await load(); } }}
+        onCommentEdit={async (comment) => {
+          const next = await promptPopup({
+            title: "Edit comment",
+            inputValue: comment.content || "",
+            inputPlaceholder: "Update your comment",
+            confirmButtonText: "Save changes",
+            cancelButtonText: "Cancel",
+          });
+          if (next !== null) {
+            await ticketService.updateComment(comment.id, next);
+            await load();
+          }
+        }}
+        onCommentDelete={async (commentId) => {
+          const confirmed = await confirmPopup({
+            title: "Delete this comment?",
+            text: "This action cannot be undone.",
+            confirmButtonText: "Yes, delete",
+            cancelButtonText: "Cancel",
+            icon: "warning",
+          });
+          if (confirmed) {
+            await ticketService.deleteComment(commentId);
+            await load();
+          }
+        }}
       />
     </div>
   );

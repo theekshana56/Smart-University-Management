@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import ResourceLayout from "../components/resource/ResourceLayout.jsx";
 import { adminUserService } from "../services/adminUserService.js";
 import AppLoader from "../components/common/AppLoader.jsx";
+import { confirmPopup } from "../utils/popup";
 import "../components/resource/table.css";
 
 const ROLE_OPTIONS = ["ADMIN", "TECHNICIAN", "STAFF", "LECTURER", "STUDENT", "USER"];
@@ -113,7 +114,13 @@ export default function ManageUsersPage({ onLogout, user }) {
   };
 
   const handleDelete = async (id) => {
-    const confirmed = window.confirm("Delete this user account?");
+    const confirmed = await confirmPopup({
+      title: "Delete this user account?",
+      text: "This action cannot be undone.",
+      confirmButtonText: "Yes, delete",
+      cancelButtonText: "Cancel",
+      icon: "warning",
+    });
     if (!confirmed) return;
 
     setError("");
