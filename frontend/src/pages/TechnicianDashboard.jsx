@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import { ticketService } from "../services/ticketService";
 import TicketTable from "../components/tickets/TicketTable";
 import { confirmPopup, promptPopup } from "../utils/popup";
+import { useNavigate } from "react-router-dom";
 import "../components/resource/resource.css";
 
 export default function TechnicianDashboard({ onLogout, user }) {
+  const navigate = useNavigate();
   const [tickets, setTickets] = useState([]);
   const [commentsByTicket, setCommentsByTicket] = useState({});
   const [commentDrafts, setCommentDrafts] = useState({});
@@ -48,6 +50,13 @@ export default function TechnicianDashboard({ onLogout, user }) {
             </div>
             <button onClick={onLogout} className="sideLogout" style={{ width: "auto", justifyContent: "center", padding: "10px 14px" }}>
               Logout
+            </button>
+            <button
+              onClick={() => navigate("/notifications")}
+              className="sideLogout"
+              style={{ width: "auto", justifyContent: "center", padding: "10px 14px" }}
+            >
+              Notifications
             </button>
           </div>
         </div>

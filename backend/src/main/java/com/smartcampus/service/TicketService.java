@@ -19,10 +19,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -56,7 +58,19 @@ public class TicketService {
             attachments.add(attachment);
         }
         ticket.setAttachments(attachments);
-        return ticketRepository.save(ticket);
+        Ticket saved = ticketRepository.save(ticket);
+        userRepository.findAll().stream()
+                .filter(candidate -> "ADMIN".equalsIgnoreCase(candidate.getRole()))
+                .filter(admin -> !Objects.equals(admin.getId(), creator.getId()))
+                .forEach(admin -> notificationService.create(
+                        admin,
+                        NotificationType.TICKET_CREATED,
+                        "New support ticket submitted",
+                        (creator.getName() == null || creator.getName().isBlank() ? "A user" : creator.getName().trim())
+                                + " created ticket #" + saved.getId() + ".",
+                        "TICKET",
+                        saved.getId()));
+        return saved;
     }
 
     public List<Ticket> listForUser(User user) {
@@ -190,16 +204,55 @@ public class TicketService {
         comment.setAuthor(actor);
         comment.setContent(requireText(content, "Comment content is required"));
         Comment saved = commentRepository.save(Objects.requireNonNull(comment, "Comment is required"));
-        if (!Objects.requireNonNull(ticket.getCreatedBy().getId(), "Ticket owner id is required")
-                .equals(Objects.requireNonNull(actor.getId(), "Actor id is required"))) {
+        Long actorId = Objects.requireNonNull(actor.getId(), "Actor id is required");
+        Long ownerId = ticket.getCreatedBy() != null ? ticket.getCreatedBy().getId() : null;
+        Long technicianId = ticket.getAssignedTechnician() != null ? ticket.getAssignedTechnician().getId() : null;
+
+        String preview = saved.getContent().length() > 120
+                ? saved.getContent().substring(0, 120) + "..."
+                : saved.getContent();
+        String actorName = actor.getName() == null || actor.getName().isBlank()
+                ? "A user"
+                : actor.getName().trim();
+
+        if (ownerId != null && !ownerId.equals(actorId)) {
             notificationService.create(
                     ticket.getCreatedBy(),
                     NotificationType.TICKET_COMMENT_ADDED,
                     "New comment on your ticket",
-                    actor.getName() + " commented on ticket #" + ticket.getId() + ".",
+                    actorName + " commented on ticket #" + ticket.getId() + ": \"" + preview + "\"",
                     "TICKET",
                     ticket.getId());
         }
+
+        if (technicianId != null && !technicianId.equals(actorId) && !technicianId.equals(ownerId)) {
+            notificationService.create(
+                    ticket.getAssignedTechnician(),
+                    NotificationType.TICKET_COMMENT_ADDED,
+                    "New comment on assigned ticket",
+                    actorName + " commented on ticket #" + ticket.getId() + ": \"" + preview + "\"",
+                    "TICKET",
+                    ticket.getId());
+        }
+
+        Set<Long> notifiedUserIds = new HashSet<>();
+        if (ownerId != null) {
+            notifiedUserIds.add(ownerId);
+        }
+        if (technicianId != null) {
+            notifiedUserIds.add(technicianId);
+        }
+        notifiedUserIds.add(actorId);
+        userRepository.findAll().stream()
+                .filter(candidate -> "ADMIN".equalsIgnoreCase(candidate.getRole()))
+                .filter(admin -> admin.getId() != null && !notifiedUserIds.contains(admin.getId()))
+                .forEach(admin -> notificationService.create(
+                        admin,
+                        NotificationType.TICKET_COMMENT_ADDED,
+                        "New comment on campus ticket",
+                        actorName + " commented on ticket #" + ticket.getId() + ": \"" + preview + "\"",
+                        "TICKET",
+                        ticket.getId()));
         return saved;
     }
 

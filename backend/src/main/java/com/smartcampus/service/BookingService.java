@@ -11,7 +11,9 @@ import com.smartcampus.dto.BookingRequest;
 import com.smartcampus.model.Auth.User;
 import com.smartcampus.model.Booking;
 import com.smartcampus.model.Booking.BookingStatus;
+import com.smartcampus.model.NotificationType;
 import com.smartcampus.model.Resource;
+import com.smartcampus.repository.Auth.UserRepository;
 import com.smartcampus.repository.BookingRepository;
 import com.smartcampus.repository.ResourceRepository;
 
@@ -20,13 +22,16 @@ public class BookingService {
 
     private final BookingRepository bookingRepository;
     private final ResourceRepository resourceRepository;
+    private final UserRepository userRepository;
     private final NotificationService notificationService;
 
     public BookingService(BookingRepository bookingRepository,
             ResourceRepository resourceRepository,
+            UserRepository userRepository,
             NotificationService notificationService) {
         this.bookingRepository = bookingRepository;
         this.resourceRepository = resourceRepository;
+        this.userRepository = userRepository;
         this.notificationService = notificationService;
     }
 
@@ -64,7 +69,17 @@ public class BookingService {
         booking.setAttendees(request.getAttendees());
         booking.setStatus(BookingStatus.PENDING);
 
-        return bookingRepository.save(booking);
+        Booking saved = bookingRepository.save(booking);
+        userRepository.findAll().stream()
+                .filter(candidate -> "ADMIN".equalsIgnoreCase(candidate.getRole()))
+                .forEach(admin -> notificationService.create(
+                        admin,
+                        NotificationType.BOOKING_REQUESTED,
+                        "New booking request",
+                        "Booking request #" + saved.getId() + " was created by " + user.getName() + ".",
+                        "BOOKING",
+                        saved.getId()));
+        return saved;
     }
 
     public List<Booking> getUserBookings(Long userId) {
