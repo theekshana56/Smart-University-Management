@@ -2,7 +2,7 @@ import AdminAssignment from "./AdminAssignment";
 import CommentSection from "./CommentSection";
 import TechnicianActions from "./TechnicianActions";
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8085/api";
+import { API_BASE_URL as API_BASE } from "../../api/apiClient";
 const API_ORIGIN = API_BASE.replace(/\/api\/?$/, "");
 
 function toAttachmentUrl(path) {

@@ -62,7 +62,7 @@ public class SecurityConfig {
                 .httpBasic(org.springframework.security.config.Customizer.withDefaults())
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo.userService(oauth2UserService))
-                        .defaultSuccessUrl("http://localhost:5173", true) // Redirect to frontend after success
+                        .defaultSuccessUrl("http://localhost:5173/Smart-University-Management/", true)
                 );
 
         return http.build();

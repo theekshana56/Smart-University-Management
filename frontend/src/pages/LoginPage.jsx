@@ -1,13 +1,11 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { apiClient } from "../api/apiClient";
+import { apiClient, API_BASE_URL, BACKEND_BASE_URL } from "../api/apiClient";
 import AppLoader from "../components/common/AppLoader.jsx";
 import BrandLogo from "../components/common/BrandLogo.jsx";
 import "./login.css";
 
 const AUTH_HEADER_STORAGE_KEY = "sum_auth_header";
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8085/api";
-const BACKEND_BASE_URL = API_BASE_URL.replace(/\/api\/?$/, "");
 
 export default function LoginPage({ onLogin }) {
   const [isLogin, setIsLogin] = useState(true);
