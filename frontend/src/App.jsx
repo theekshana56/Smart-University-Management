@@ -22,6 +22,7 @@ function AppRoutes({ user, onLogin, onLogout, onProfileUpdate }) {
   const [routeLoading, setRouteLoading] = useState(false);
   const firstRender = useRef(true);
   const isAuthenticated = Boolean(user);
+  const isTechnician = user?.role === "TECHNICIAN";
 
   useEffect(() => {
     if (firstRender.current) {
@@ -40,6 +41,8 @@ function AppRoutes({ user, onLogin, onLogout, onProfileUpdate }) {
 
   const renderProtected = (element) =>
     isAuthenticated ? element : <Navigate to="/" replace />;
+  const renderNonTechnicianProtected = (element) =>
+    !isAuthenticated ? <Navigate to="/" replace /> : isTechnician ? <Navigate to="/tickets" replace /> : element;
 
   return (
     <>
@@ -47,7 +50,11 @@ function AppRoutes({ user, onLogin, onLogout, onProfileUpdate }) {
         <Route
           path="/"
           element={
-            <LandingPage user={user} onLogout={onLogout} />
+            isAuthenticated && isTechnician ? (
+              <Navigate to="/tickets" replace />
+            ) : (
+              <LandingPage user={user} onLogout={onLogout} />
+            )
           }
         />
 
@@ -88,11 +95,11 @@ function AppRoutes({ user, onLogin, onLogout, onProfileUpdate }) {
 
         <Route
           path="/resources"
-          element={renderProtected(<ResourcesPage onLogout={onLogout} user={user} />)}
+          element={renderNonTechnicianProtected(<ResourcesPage onLogout={onLogout} user={user} />)}
         />
         <Route
           path="/bookings"
-          element={renderProtected(<BookingsPage onLogout={onLogout} user={user} />)}
+          element={renderNonTechnicianProtected(<BookingsPage onLogout={onLogout} user={user} />)}
         />
         <Route
           path="/tickets"
@@ -100,11 +107,11 @@ function AppRoutes({ user, onLogin, onLogout, onProfileUpdate }) {
         />
         <Route
           path="/notifications"
-          element={renderProtected(<NotificationsPage onLogout={onLogout} user={user} />)}
+          element={renderNonTechnicianProtected(<NotificationsPage onLogout={onLogout} user={user} />)}
         />
         <Route
           path="/profile"
-          element={renderProtected(
+          element={renderNonTechnicianProtected(
             <ProfilePage onLogout={onLogout} user={user} onProfileUpdate={onProfileUpdate} />
           )}
         />

@@ -147,6 +147,9 @@ public class TicketService {
     @Transactional
     public Comment addComment(Long ticketId, String content, User actor) {
         Ticket ticket = getTicket(ticketId);
+        if (!canAccessTicket(ticket, actor)) {
+            throw new IllegalArgumentException("Forbidden");
+        }
         Comment comment = new Comment();
         comment.setTicket(ticket);
         comment.setAuthor(actor);
@@ -165,8 +168,11 @@ public class TicketService {
         return saved;
     }
 
-    public List<Comment> listComments(Long ticketId) {
-        getTicket(ticketId);
+    public List<Comment> listComments(Long ticketId, User actor) {
+        Ticket ticket = getTicket(ticketId);
+        if (!canAccessTicket(ticket, actor)) {
+            throw new IllegalArgumentException("Forbidden");
+        }
         return commentRepository.findByTicketIdOrderByCreatedAtAsc(ticketId);
     }
 
@@ -174,6 +180,9 @@ public class TicketService {
     public Comment updateComment(Long commentId, String content, User actor) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("Comment not found"));
+        if (!canAccessTicket(comment.getTicket(), actor)) {
+            throw new IllegalArgumentException("Forbidden");
+        }
         if (!canModifyComment(comment, actor)) {
             throw new IllegalArgumentException("You cannot edit this comment");
         }
@@ -185,6 +194,9 @@ public class TicketService {
     public void deleteComment(Long commentId, User actor) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("Comment not found"));
+        if (!canAccessTicket(comment.getTicket(), actor)) {
+            throw new IllegalArgumentException("Forbidden");
+        }
         if (!canModifyComment(comment, actor)) {
             throw new IllegalArgumentException("You cannot delete this comment");
         }
@@ -255,8 +267,16 @@ public class TicketService {
     }
 
     private boolean canModifyComment(Comment comment, User actor) {
-        if ("ADMIN".equalsIgnoreCase(actor.getRole())) return true;
         return comment.getAuthor().getId().equals(actor.getId());
+    }
+
+    private boolean canAccessTicket(Ticket ticket, User actor) {
+        if (ticket == null || actor == null || actor.getId() == null) return false;
+        String role = actor.getRole() == null ? "" : actor.getRole().toUpperCase(Locale.ROOT);
+        if ("ADMIN".equals(role) || "STAFF".equals(role)) return true;
+        if (ticket.getCreatedBy() != null && actor.getId().equals(ticket.getCreatedBy().getId())) return true;
+        return ticket.getAssignedTechnician() != null
+                && actor.getId().equals(ticket.getAssignedTechnician().getId());
     }
 
     private void requireRole(User user, String role) {

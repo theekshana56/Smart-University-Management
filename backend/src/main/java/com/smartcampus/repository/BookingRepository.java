@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -61,6 +62,10 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
         return findUnavailableResourceIds(date, startTime, endTime,
                 Arrays.asList(BookingStatus.PENDING, BookingStatus.APPROVED));
     }
+
+    @Modifying
+    @Query("DELETE FROM Booking b WHERE b.user.id = :userId")
+    int deleteAllByUserId(@Param("userId") Long userId);
 
     List<Booking> findAllByOrderByCreatedAtDesc();
 }
