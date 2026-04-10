@@ -16,7 +16,6 @@ const emptyForm = {
 };
 
 export default function ResourcesPage({ onLogout, user }) {
-
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState(emptyForm);
@@ -32,7 +31,6 @@ export default function ResourcesPage({ onLogout, user }) {
 
   const load = async () => {
     setLoading(true);
-
     const params = {};
     if (filters.q) params.q = filters.q;
     if (filters.type) params.type = filters.type;

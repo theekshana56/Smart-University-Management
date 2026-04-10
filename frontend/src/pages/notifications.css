@@ -1,0 +1,187 @@
+.notificationsHeader,
+.notificationsPanel {
+  width: 100%;
+}
+
+.notificationsPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.notificationsPrefsCard {
+  background: linear-gradient(180deg, #eef1f6 0%, #e5e9f0 100%);
+  border: 1px solid rgba(148, 163, 184, 0.36);
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.notificationsSectionTitle {
+  margin: 0 0 10px 0;
+  font-size: 1rem;
+  color: #111827;
+}
+
+.notificationsPrefsGrid {
+  display: grid;
+  gap: 10px;
+}
+
+.notificationsPrefItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  background: rgba(255, 255, 255, 0.58);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+
+.notificationsPrefTextWrap {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.notificationsPrefTitle {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.notificationsPrefHint {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.notificationsSwitch {
+  position: relative;
+  width: 42px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.notificationsSwitch input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.notificationsSwitchSlider {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: #cbd5e1;
+  transition: background 0.2s ease;
+}
+
+.notificationsSwitchSlider::after {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  left: 3px;
+  top: 3px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.notificationsSwitch input:checked + .notificationsSwitchSlider {
+  background: #2563eb;
+}
+
+.notificationsSwitch input:checked + .notificationsSwitchSlider::after {
+  transform: translateX(18px);
+}
+
+.notificationsSwitch input:disabled + .notificationsSwitchSlider {
+  opacity: 0.6;
+}
+
+.notificationsPrefsStatus {
+  margin-top: 8px;
+  font-size: 12px;
+  text-align: left;
+}
+
+.notificationsToolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.notificationsUnreadCount {
+  font-size: 0.98rem;
+}
+
+.notificationsError {
+  color: #b91c1c;
+}
+
+.notificationsList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.notificationsItem {
+  border-radius: 14px;
+  padding: 14px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+}
+
+.notificationsItem.isUnread {
+  border-color: #bfdbfe;
+  background: linear-gradient(180deg, #eff6ff 0%, #f8fbff 100%);
+}
+
+.notificationsItem.isRead {
+  opacity: 0.95;
+}
+
+.notificationsItemTop,
+.notificationsItemBottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.notificationsItemTitle {
+  font-size: 0.97rem;
+  color: #0f172a;
+}
+
+.notificationsItemDate {
+  font-size: 12px;
+  text-align: right;
+  padding: 0;
+}
+
+.notificationsItemMessage {
+  margin: 8px 0 10px;
+  color: #1f2937;
+}
+
+@media (max-width: 680px) {
+  .notificationsPrefItem {
+    padding: 10px;
+  }
+
+  .notificationsToolbar,
+  .notificationsItemTop,
+  .notificationsItemBottom {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .notificationsItemDate {
+    text-align: left;
+  }
+}

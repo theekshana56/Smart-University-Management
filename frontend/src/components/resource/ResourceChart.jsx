@@ -30,13 +30,22 @@ export default function ResourceChart({ items }) {
             ))}
           </Pie>
 
-          <Tooltip />
+          <Tooltip
+            contentStyle={{
+              background: 'var(--panel)',
+              borderColor: 'var(--border)',
+              borderRadius: '12px',
+              color: 'var(--text)'
+            }}
+            itemStyle={{ color: 'var(--text)' }}
+          />
 
           <Legend
             layout="vertical"
             verticalAlign="middle"
             align="right"
             iconType="circle"
+            formatter={(value) => <span style={{ color: 'var(--text)' }}>{value}</span>}
             wrapperStyle={{
               right: 40,
               top: "50%",

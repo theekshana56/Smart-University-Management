@@ -1,16 +1,7 @@
 import "./table.css";
 import { useState } from "react";
 import { resourceService } from "../../services/resourceService";
-import ResourceCard from "./ResourceCard";
-
-const TYPE_CONFIG = {
-  LAB:          { icon: "🔬", label: "Lab",          cls: "lab" },
-  LECTURE_HALL: { icon: "🏛️", label: "Lecture Hall", cls: "lecture_hall" },
-  MEETING_ROOM: { icon: "🤝", label: "Meeting Room", cls: "meeting_room" },
-  EQUIPMENT:    { icon: "📷", label: "Equipment",    cls: "equipment" },
-};
-
-const MAX_CAPACITY = 200;
+import AppLoader from "../common/AppLoader.jsx";
 
 export default function ResourceList({ items, filters, setFilters, onEdit, onDelete }) {
 
@@ -122,55 +113,28 @@ export default function ResourceList({ items, filters, setFilters, onEdit, onDel
               </tr>
             </thead>
 
-            <tbody>
-              {items.length === 0 ? (
-                <tr>
-                  <td colSpan="7" className="muted">No resources found</td>
-                </tr>
-              ) : (
-                items.map((r) => {
-                  const status = getStatus(r);
-                  const capPct = Math.min((r.capacity / MAX_CAPACITY) * 100, 100);
-
-                  return (
-                    <tr key={r.id}>
-                      <td>
-                        <input
-                          type="checkbox"
-                          checked={selected.includes(r.id)}
-                          onChange={() => toggleSelect(r.id)}
-                        />
-                      </td>
-
-                      <td
-                        style={{ cursor: "pointer", fontWeight: "600" }}
-                        onClick={() => setSelectedResource(r)}
-                      >
-                        {r.name}
-                      </td>
-
-                      <td>{getTypePill(r.type)}</td>
-
-                      <td>
-                        <span style={{ fontSize: "13px", fontWeight: "600" }}>
-                          {r.capacity ?? "—"}
-                        </span>
-                        {r.capacity > 0 && (
-                          <div className="capBar">
-                            <div className="capBarFill" style={{ width: `${capPct}%` }} />
-                          </div>
-                        )}
-                      </td>
-
-                      <td style={{ fontSize: "13px", color: "var(--muted)" }}>
-                        📍 {r.location || "—"}
-                      </td>
-
-                      <td>
-                        <span className={`pill ${status.class}`}>
-                          {status.text}
-                        </span>
-                      </td>
+          <tbody>
+            {loading ? (
+              <tr>
+                <td colSpan="8" className="muted">
+                  <AppLoader label="Loading resources..." variant="table" />
+                </td>
+              </tr>
+            ) : items.length === 0 ? (
+              <tr><td colSpan="8" className="muted">No resources found.</td></tr>
+            ) : (
+              items.map((r) => (
+                <tr key={r.id}>
+                  <td>{r.id}</td>
+                  <td>{r.name}</td>
+                  <td>{r.type}</td>
+                  <td>{r.capacity}</td>
+                  <td>{r.location}</td>
+                  <td>
+                    <span className={r.status === "ACTIVE" ? "pill ok" : "pill bad"}>
+                      {r.status}
+                    </span>
+                  </td>
 
                       <td>
                         <div className="actions">

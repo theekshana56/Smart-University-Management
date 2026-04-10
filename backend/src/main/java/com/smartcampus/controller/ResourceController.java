@@ -20,7 +20,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/resources")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:5173")
 public class ResourceController {
 
     private final ResourceService service;
