@@ -31,3 +31,6 @@ dist-ssr/
 .idea/
 .vscode/
 *.swp
+
+# Local-only docs (not pushed to remote)
+frontend/src/components/resource/README.md
