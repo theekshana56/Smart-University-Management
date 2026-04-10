@@ -107,7 +107,7 @@ function AppRoutes({ user, onLogin, onLogout, onProfileUpdate }) {
         />
         <Route
           path="/notifications"
-          element={renderNonTechnicianProtected(<NotificationsPage onLogout={onLogout} user={user} />)}
+          element={renderProtected(<NotificationsPage onLogout={onLogout} user={user} />)}
         />
         <Route
           path="/profile"

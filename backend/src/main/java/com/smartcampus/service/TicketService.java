@@ -155,13 +155,35 @@ public class TicketService {
         comment.setAuthor(actor);
         comment.setContent(requireText(content, "Comment content is required"));
         Comment saved = commentRepository.save(Objects.requireNonNull(comment, "Comment is required"));
-        if (!Objects.requireNonNull(ticket.getCreatedBy().getId(), "Ticket owner id is required")
-                .equals(Objects.requireNonNull(actor.getId(), "Actor id is required"))) {
+        Long actorId = Objects.requireNonNull(actor.getId(), "Actor id is required");
+        Long ownerId = ticket.getCreatedBy() != null ? ticket.getCreatedBy().getId() : null;
+        Long technicianId = ticket.getAssignedTechnician() != null ? ticket.getAssignedTechnician().getId() : null;
+        
+        String preview = saved.getContent().length() > 120
+                ? saved.getContent().substring(0, 120) + "..."
+                : saved.getContent();
+        String actorName = actor.getName() == null || actor.getName().isBlank()
+                ? "A user"
+                : actor.getName().trim();
+        
+        // Notify ticket owner if owner is not the commenter
+        if (ownerId != null && !ownerId.equals(actorId)) {
             notificationService.create(
                     ticket.getCreatedBy(),
                     NotificationType.TICKET_COMMENT_ADDED,
                     "New comment on your ticket",
-                    actor.getName() + " commented on ticket #" + ticket.getId() + ".",
+                    actorName + " commented on ticket #" + ticket.getId() + ": \"" + preview + "\"",
+                    "TICKET",
+                    ticket.getId());
+        }
+        
+        // Notify assigned technician if technician is not the commenter and not same as owner
+        if (technicianId != null && !technicianId.equals(actorId) && !technicianId.equals(ownerId)) {
+            notificationService.create(
+                    ticket.getAssignedTechnician(),
+                    NotificationType.TICKET_COMMENT_ADDED,
+                    "New comment on assigned ticket",
+                    actorName + " commented on ticket #" + ticket.getId() + ": \"" + preview + "\"",
                     "TICKET",
                     ticket.getId());
         }
