@@ -272,7 +272,7 @@ export default function BookingsPage({ onLogout, user }) {
 
   return (
     <ResourceLayout onLogout={onLogout} user={user}>
-      
+
       <section className="card resourcePageHeader" style={{ width: '100%' }}>
         <div>
           <h1 className="resourcePageTitle">Bookings Management</h1>
@@ -290,7 +290,7 @@ export default function BookingsPage({ onLogout, user }) {
               <h2 className="resourceSectionTitle">Create Booking</h2>
               <p className="resourceSectionText">Fill out the details to request a resource.</p>
             </div>
-              
+
             <form className="card" onSubmit={handleCreateBooking} style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
               <div className="grid2" style={{ flex: 1 }}>
                 <div>
@@ -363,7 +363,7 @@ export default function BookingsPage({ onLogout, user }) {
                 <h2 className="resourceSectionTitle">My Bookings</h2>
                 <p className="resourceSectionText">Your recent reservation requests and their statuses.</p>
               </div>
-              
+
               {myBookings.length === 0 ? (
                 <div className="muted" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '300px' }}>
                   You haven't made any bookings yet.
@@ -413,7 +413,7 @@ export default function BookingsPage({ onLogout, user }) {
             <p className="resourceSectionText">Review and manage campus-wide resource requests.</p>
           </div>
           {adminLoadError ? (
-            <div className="card" style={{ marginBottom: '12px', border: '1px solid #f4b4b4', background: '#fff5f5' }}>
+            <div className="card" style={{ marginBottom: '12px', border: '1px solid #f79b9bff', background: '#e6dfdfff' }}>
               <strong>Could not load admin bookings.</strong> {adminLoadError}
             </div>
           ) : null}
@@ -446,7 +446,7 @@ export default function BookingsPage({ onLogout, user }) {
               <button type="button" className="btnMini" onClick={clearAdminFilters}>Clear</button>
             </div>
           </form>
-          
+
           {allBookings.length === 0 ? (
             <div className="muted" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               No bookings found in the system.
