@@ -1,6 +1,7 @@
 import { useState } from "react";
 import ResourceLayout from "../components/resource/ResourceLayout.jsx";
 import { profileService } from "../services/profileService.js";
+import { promptPopup, showWarningPopup } from "../utils/popup";
 import "../components/resource/table.css";
 
 export default function ProfilePage({ onLogout, user, onProfileUpdate }) {
@@ -51,8 +52,17 @@ export default function ProfilePage({ onLogout, user, onProfileUpdate }) {
   };
 
   const onDeleteAccount = async () => {
-    const confirmation = window.prompt("Type DELETE to permanently delete your account:");
+    const confirmation = await promptPopup({
+      title: "Delete account",
+      text: "Type DELETE to permanently delete your account.",
+      inputPlaceholder: "Type DELETE",
+      confirmButtonText: "Continue",
+      cancelButtonText: "Cancel",
+    });
+    if (confirmation === null) return;
+
     if (confirmation !== "DELETE") {
+      await showWarningPopup("Confirmation mismatch", "Please type DELETE exactly to continue.");
       return;
     }
 

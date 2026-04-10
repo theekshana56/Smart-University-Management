@@ -2,6 +2,12 @@ import React, { useState, useEffect } from 'react';
 import ResourceLayout from '../components/resource/ResourceLayout';
 import { bookingService } from '../services/bookingService';
 import { resourceService } from '../services/resourceService';
+import {
+  confirmPopup,
+  showErrorPopup,
+  showSuccessPopup,
+  showWarningPopup,
+} from '../utils/popup';
 import '../components/resource/table.css';
 
 export default function BookingsPage({ onLogout, user }) {
@@ -157,7 +163,10 @@ export default function BookingsPage({ onLogout, user }) {
     if (!formData.resourceId) return;
     if (unavailableResourceIds.includes(Number(formData.resourceId))) {
       setFormData((prev) => ({ ...prev, resourceId: '' }));
-      alert('Selected resource is already booked for this time slot. Please choose another.');
+      showWarningPopup(
+        'Resource unavailable',
+        'Selected resource is already booked for this time slot. Please choose another.'
+      );
     }
   }, [unavailableResourceIds, formData.resourceId]);
 
@@ -166,7 +175,7 @@ export default function BookingsPage({ onLogout, user }) {
     try {
       const payload = { ...formData, attendees: Number(formData.attendees) };
       await bookingService.createBooking(payload);
-      alert('Booking created successfully');
+      await showSuccessPopup('Booking created', 'Your booking request was submitted successfully.');
       setFormData({
         resourceId: '',
         date: '',
@@ -186,47 +195,55 @@ export default function BookingsPage({ onLogout, user }) {
           errorMessage = String(error.response.data);
         }
       }
-      alert("Error: " + errorMessage);
+      await showErrorPopup('Booking failed', errorMessage);
     }
   };
 
   const handleCancelBooking = async (id) => {
-    if (!window.confirm("Are you sure you want to cancel this booking?")) return;
+    const confirmed = await confirmPopup({
+      title: 'Cancel this booking?',
+      text: 'This action will mark the booking as cancelled.',
+      confirmButtonText: 'Yes, cancel booking',
+      cancelButtonText: 'Keep booking',
+      icon: 'warning',
+    });
+    if (!confirmed) return;
+
     try {
       await bookingService.cancelBooking(id);
-      alert('Booking cancelled');
+      await showSuccessPopup('Booking cancelled', 'The booking was cancelled successfully.');
       loadMyBookings();
     } catch (error) {
       console.error(error);
-      alert('Failed to cancel booking');
+      await showErrorPopup('Cancel failed', 'Failed to cancel booking.');
     }
   };
 
   const handleApproveBooking = async (id) => {
     try {
       await bookingService.approveBooking(id);
-      alert('Booking approved');
+      await showSuccessPopup('Booking approved', 'The booking request was approved.');
       loadAllBookings();
     } catch (error) {
       console.error(error);
-      alert('Failed to approve booking');
+      await showErrorPopup('Approve failed', 'Failed to approve booking.');
     }
   };
 
   const handleRejectBooking = async (id) => {
     const reason = rejectionReasons[id];
     if (!reason) {
-      alert("Please provide a rejection reason");
+      await showWarningPopup('Reason required', 'Please provide a rejection reason.');
       return;
     }
     try {
       await bookingService.rejectBooking(id, reason);
-      alert('Booking rejected');
+      await showSuccessPopup('Booking rejected', 'The booking request was rejected.');
       setRejectionReasons(prev => ({ ...prev, [id]: '' }));
       loadAllBookings();
     } catch (error) {
       console.error(error);
-      alert('Failed to reject booking');
+      await showErrorPopup('Reject failed', 'Failed to reject booking.');
     }
   };
 

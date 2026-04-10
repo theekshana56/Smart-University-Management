@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ticketService } from "../services/ticketService";
 import TicketTable from "../components/tickets/TicketTable";
+import { confirmPopup, promptPopup } from "../utils/popup";
 import "../components/resource/resource.css";
 
 export default function TechnicianDashboard({ onLogout, user }) {
@@ -68,8 +69,32 @@ export default function TechnicianDashboard({ onLogout, user }) {
             onStatus={handleStatus}
             onCommentDraft={(ticketId, value) => setCommentDrafts((p) => ({ ...p, [ticketId]: value }))}
             onCommentPost={async (ticketId) => { await ticketService.addComment(ticketId, commentDrafts[ticketId] || ""); setCommentDrafts((p) => ({ ...p, [ticketId]: "" })); await loadTickets(); }}
-            onCommentEdit={async (comment) => { const v = window.prompt("Edit comment", comment.content); if (v !== null) { await ticketService.updateComment(comment.id, v); await loadTickets(); } }}
-            onCommentDelete={async (commentId) => { if (window.confirm("Delete this comment?")) { await ticketService.deleteComment(commentId); await loadTickets(); } }}
+            onCommentEdit={async (comment) => {
+              const next = await promptPopup({
+                title: "Edit comment",
+                inputValue: comment.content || "",
+                inputPlaceholder: "Update your comment",
+                confirmButtonText: "Save changes",
+                cancelButtonText: "Cancel",
+              });
+              if (next !== null) {
+                await ticketService.updateComment(comment.id, next);
+                await loadTickets();
+              }
+            }}
+            onCommentDelete={async (commentId) => {
+              const confirmed = await confirmPopup({
+                title: "Delete this comment?",
+                text: "This action cannot be undone.",
+                confirmButtonText: "Yes, delete",
+                cancelButtonText: "Cancel",
+                icon: "warning",
+              });
+              if (confirmed) {
+                await ticketService.deleteComment(commentId);
+                await loadTickets();
+              }
+            }}
           />
         </div>
       </div>

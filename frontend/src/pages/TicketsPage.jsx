@@ -6,6 +6,7 @@ import TechnicianDashboard from "./TechnicianDashboard";
 import AdminTicketManager from "./AdminTicketManager";
 import TicketForm from "../components/tickets/TicketForm";
 import TicketTable from "../components/tickets/TicketTable";
+import { confirmPopup, promptPopup } from "../utils/popup";
 
 export default function TicketsPage({ onLogout, user }) {
   const [tickets, setTickets] = useState([]);
@@ -75,14 +76,27 @@ export default function TicketsPage({ onLogout, user }) {
   };
 
   const updateComment = async (comment) => {
-    const next = window.prompt("Edit comment", comment.content);
+    const next = await promptPopup({
+      title: "Edit comment",
+      inputValue: comment.content || "",
+      inputPlaceholder: "Update your comment",
+      confirmButtonText: "Save changes",
+      cancelButtonText: "Cancel",
+    });
     if (next === null) return;
     await ticketService.updateComment(comment.id, next);
     await loadTickets();
   };
 
   const deleteComment = async (commentId) => {
-    if (!window.confirm("Delete this comment?")) return;
+    const confirmed = await confirmPopup({
+      title: "Delete this comment?",
+      text: "This action cannot be undone.",
+      confirmButtonText: "Yes, delete",
+      cancelButtonText: "Cancel",
+      icon: "warning",
+    });
+    if (!confirmed) return;
     await ticketService.deleteComment(commentId);
     await loadTickets();
   };
