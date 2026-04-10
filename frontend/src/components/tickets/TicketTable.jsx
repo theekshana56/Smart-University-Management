@@ -51,10 +51,10 @@ export default function TicketTable({
   onCommentPost,
   onCommentEdit,
   onCommentDelete,
-  onAdminDeleteResolvedTicket,
+  onDeleteResolvedTicket,
   onAdminDownloadResolvedPdf,
 }) {
-  const canAdminArchive = (status) =>
+  const canDeleteResolved = (status) =>
     String(status || "").toUpperCase() === "RESOLVED" || String(status || "").toUpperCase() === "CLOSED";
 
   return (
@@ -69,16 +69,18 @@ export default function TicketTable({
               </div>
             </div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
-              {isAdmin && canAdminArchive(ticket.status) && typeof onAdminDownloadResolvedPdf === "function" ? (
+              {isAdmin && canDeleteResolved(ticket.status) && typeof onAdminDownloadResolvedPdf === "function" ? (
                 <button type="button" style={adminBtn} onClick={() => onAdminDownloadResolvedPdf(ticket.id)}>
                   Download PDF
                 </button>
               ) : null}
-              {isAdmin && canAdminArchive(ticket.status) && typeof onAdminDeleteResolvedTicket === "function" ? (
+              {(isAdmin || isTechnician) &&
+              canDeleteResolved(ticket.status) &&
+              typeof onDeleteResolvedTicket === "function" ? (
                 <button
                   type="button"
                   style={{ ...adminBtn, borderColor: "#fecaca", color: "#b91c1c", background: "#fef2f2" }}
-                  onClick={() => onAdminDeleteResolvedTicket(ticket.id)}
+                  onClick={() => onDeleteResolvedTicket(ticket.id)}
                 >
                   Delete ticket
                 </button>

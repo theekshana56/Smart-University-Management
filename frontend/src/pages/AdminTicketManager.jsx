@@ -288,7 +288,7 @@ export default function AdminTicketManager({ user }) {
                 showErrorPopup("Could not download PDF", String(e?.message || e?.response?.data || "Request failed"));
               }
             }}
-            onAdminDeleteResolvedTicket={async (ticketId) => {
+            onDeleteResolvedTicket={async (ticketId) => {
               const confirmed = await confirmPopup({
                 title: "Delete this ticket?",
                 text: "Only resolved or closed tickets can be removed. This cannot be undone.",
