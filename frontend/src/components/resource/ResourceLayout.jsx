@@ -19,7 +19,7 @@ export default function ResourceLayout({ children, onLogout, user }) {
   const isTechnician = user?.role === "TECHNICIAN";
 
   useEffect(() => {
-    if (!user || isTechnician) return;
+    if (!user) return;
     let isMounted = true;
 
     const loadUnread = async () => {
@@ -37,7 +37,7 @@ export default function ResourceLayout({ children, onLogout, user }) {
       isMounted = false;
       clearInterval(interval);
     };
-  }, [user?.id, isTechnician]);
+  }, [user?.id]);
 
   return (
     <div className="appShell">
@@ -126,22 +126,20 @@ export default function ResourceLayout({ children, onLogout, user }) {
             <img src={ticketsIcon} alt="" className="sideNavIcon" />
             <span className="sideNavLabel">Tickets</span>
           </NavLink>
-          {!isTechnician && (
-            <NavLink
-              to="/notifications"
-              className={({ isActive }) =>
-                isActive ? "sideNavItem active" : "sideNavItem"
-              }
-            >
-              <span className="sideNavIconWrap">
-                <img src={notificationsIcon} alt="" className="sideNavIcon" />
-                {unreadCount > 0 ? (
-                  <span className="notifyBadge">{unreadCount > 99 ? "99+" : unreadCount}</span>
-                ) : null}
-              </span>
-              <span className="sideNavLabel">Notifications</span>
-            </NavLink>
-          )}
+          <NavLink
+            to="/notifications"
+            className={({ isActive }) =>
+              isActive ? "sideNavItem active" : "sideNavItem"
+            }
+          >
+            <span className="sideNavIconWrap">
+              <img src={notificationsIcon} alt="" className="sideNavIcon" />
+              {unreadCount > 0 ? (
+                <span className="notifyBadge">{unreadCount > 99 ? "99+" : unreadCount}</span>
+              ) : null}
+            </span>
+            <span className="sideNavLabel">Notifications</span>
+          </NavLink>
           {!isTechnician && (
             <NavLink
               to="/profile"

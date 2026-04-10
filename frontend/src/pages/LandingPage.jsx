@@ -52,9 +52,9 @@ export default function LandingPage({ user, onLogout }) {
           navOpen ? "navOpen" : ""
         }`}
       >
-        <a href="#home" className="landingBrand" aria-label="Smart University home">
+        <Link to="/" className="landingBrand" aria-label="Smart University home">
           <BrandLogo className="landingBrandLogo" />
-        </a>
+        </Link>
         <button
           type="button"
           className="landingMenuToggle"
@@ -203,18 +203,35 @@ export default function LandingPage({ user, onLogout }) {
             </>
           ) : (
             <>
-              <a href="#home" className="landingNavLink active" onClick={handleNavItemClick}>
+              <NavLink
+                to="/"
+                end
+                className={({ isActive }) => (isActive ? "landingNavLink active" : "landingNavLink")}
+                onClick={handleNavItemClick}
+              >
                 Home
-              </a>
-              <a href="#about" className="landingNavLink" onClick={handleNavItemClick}>
+              </NavLink>
+              <NavLink
+                to="/about"
+                className={({ isActive }) => (isActive ? "landingNavLink active" : "landingNavLink")}
+                onClick={handleNavItemClick}
+              >
                 About Us
-              </a>
-              <a href="#features" className="landingNavLink" onClick={handleNavItemClick}>
+              </NavLink>
+              <NavLink
+                to="/features"
+                className={({ isActive }) => (isActive ? "landingNavLink active" : "landingNavLink")}
+                onClick={handleNavItemClick}
+              >
                 Features
-              </a>
-              <a href="#contact" className="landingNavLink" onClick={handleNavItemClick}>
+              </NavLink>
+              <NavLink
+                to="/contact"
+                className={({ isActive }) => (isActive ? "landingNavLink active" : "landingNavLink")}
+                onClick={handleNavItemClick}
+              >
                 Contact
-              </a>
+              </NavLink>
             </>
           )}
         </nav>
@@ -268,6 +285,22 @@ export default function LandingPage({ user, onLogout }) {
                 )}
               </div>
             </div>
+            {!isAuthenticated ? (
+              <div className="landingQuickGrid">
+                <Link to="/about" className="landingQuickCard">
+                  <h3>About Platform</h3>
+                  <p>Learn the story and mission behind Smart University Management.</p>
+                </Link>
+                <Link to="/features" className="landingQuickCard">
+                  <h3>Feature Tour</h3>
+                  <p>Explore modules for resources, bookings, tickets, and notifications.</p>
+                </Link>
+                <Link to="/contact" className="landingQuickCard">
+                  <h3>Contact Support</h3>
+                  <p>Find support channels and office hours for quick assistance.</p>
+                </Link>
+              </div>
+            ) : null}
           </section>
 
           <section id="about" className="landingSection">

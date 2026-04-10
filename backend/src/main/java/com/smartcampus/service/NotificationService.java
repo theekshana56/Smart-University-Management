@@ -121,12 +121,18 @@ public class NotificationService {
     }
 
     private boolean isCategoryEnabled(User recipient, NotificationType type) {
+        if ("ADMIN".equalsIgnoreCase(recipient.getRole())
+                && (type == NotificationType.BOOKING_REQUESTED
+                        || type == NotificationType.TICKET_CREATED
+                        || type == NotificationType.TICKET_COMMENT_ADDED)) {
+            return true;
+        }
         if (!recipient.isNotificationPreferencesCustomized()) {
             return true;
         }
         return switch (type) {
-            case BOOKING_APPROVED, BOOKING_REJECTED -> recipient.isNotifyBookingUpdates();
-            case TICKET_STATUS_CHANGED -> recipient.isNotifyTicketStatusChanges();
+            case BOOKING_APPROVED, BOOKING_REJECTED, BOOKING_REQUESTED -> recipient.isNotifyBookingUpdates();
+            case TICKET_STATUS_CHANGED, TICKET_CREATED -> recipient.isNotifyTicketStatusChanges();
             case TICKET_COMMENT_ADDED -> recipient.isNotifyTicketComments();
         };
     }

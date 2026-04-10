@@ -7,6 +7,8 @@ export default function NotificationsPage({ onLogout, user }) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [refreshing, setRefreshing] = useState(false);
+  const [filter, setFilter] = useState("all");
   const [preferences, setPreferences] = useState({
     bookingUpdates: true,
     ticketStatusChanges: true,
@@ -14,8 +16,8 @@ export default function NotificationsPage({ onLogout, user }) {
   });
   const [savingPrefs, setSavingPrefs] = useState(false);
 
-  const load = async () => {
-    setLoading(true);
+  const load = async (showLoader = true) => {
+    if (showLoader) setLoading(true);
     setError("");
     try {
       const [data, prefData] = await Promise.all([
@@ -32,7 +34,7 @@ export default function NotificationsPage({ onLogout, user }) {
       setError(err.response?.data?.error || err.response?.data || "Failed to load notifications");
       setItems([]);
     } finally {
-      setLoading(false);
+      if (showLoader) setLoading(false);
     }
   };
 
@@ -59,6 +61,23 @@ export default function NotificationsPage({ onLogout, user }) {
   };
 
   const unreadCount = items.filter((item) => !(item.isRead ?? item.read)).length;
+  const readCount = items.length - unreadCount;
+
+  const visibleItems = items.filter((item) => {
+    const isRead = item.isRead ?? item.read;
+    if (filter === "unread") return !isRead;
+    if (filter === "read") return isRead;
+    return true;
+  });
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await load(false);
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   const updatePreference = async (key) => {
     const next = { ...preferences, [key]: !preferences[key] };
@@ -125,25 +144,57 @@ export default function NotificationsPage({ onLogout, user }) {
         </div>
 
         <div className="notificationsToolbar">
-          <strong className="notificationsUnreadCount">Unread: {unreadCount}</strong>
+          <div className="notificationsStats">
+            <strong className="notificationsUnreadCount">Unread: {unreadCount}</strong>
+            <span className="muted notificationsReadCount">Read: {readCount}</span>
+          </div>
+          <div className="notificationsToolbarActions">
+            <button className="btnMini" onClick={onRefresh} disabled={loading || refreshing}>
+              {refreshing ? "Refreshing..." : "Refresh"}
+            </button>
+            <button
+              className="btnMini notificationsMarkAllBtn"
+              onClick={onMarkAllRead}
+              disabled={items.length === 0 || unreadCount === 0}
+            >
+              Mark all as read
+            </button>
+          </div>
+        </div>
+
+        <div className="notificationsFilters">
           <button
-            className="btnMini"
-            onClick={onMarkAllRead}
-            disabled={items.length === 0 || unreadCount === 0}
+            className={`notificationsFilterBtn ${filter === "all" ? "active" : ""}`}
+            onClick={() => setFilter("all")}
+            type="button"
           >
-            Mark all as read
+            All ({items.length})
+          </button>
+          <button
+            className={`notificationsFilterBtn ${filter === "unread" ? "active" : ""}`}
+            onClick={() => setFilter("unread")}
+            type="button"
+          >
+            Unread ({unreadCount})
+          </button>
+          <button
+            className={`notificationsFilterBtn ${filter === "read" ? "active" : ""}`}
+            onClick={() => setFilter("read")}
+            type="button"
+          >
+            Read ({readCount})
           </button>
         </div>
 
         {loading ? <p className="muted">Loading notifications...</p> : null}
         {error ? <p className="muted notificationsError">{String(error)}</p> : null}
 
-        {!loading && !error && items.length === 0 ? (
+        {!loading && !error && visibleItems.length === 0 ? (
           <p className="muted">No notifications yet.</p>
         ) : null}
 
         <div className="notificationsList">
-          {items.map((item) => {
+          {visibleItems.map((item) => {
             const isRead = item.isRead ?? item.read;
             return (
               <article
@@ -151,7 +202,10 @@ export default function NotificationsPage({ onLogout, user }) {
                 className={`notificationsItem ${isRead ? "isRead" : "isUnread"}`}
               >
                 <div className="notificationsItemTop">
-                  <strong className="notificationsItemTitle">{item.title}</strong>
+                  <div className="notificationsItemHeading">
+                    {!isRead ? <span className="notificationsUnreadDot" /> : null}
+                    <strong className="notificationsItemTitle">{item.title}</strong>
+                  </div>
                   <span className="muted notificationsItemDate">
                     {item.createdAt ? new Date(item.createdAt).toLocaleString() : ""}
                   </span>
