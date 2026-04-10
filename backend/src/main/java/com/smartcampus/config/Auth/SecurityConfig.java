@@ -14,6 +14,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import java.util.Arrays;
 
 import com.smartcampus.service.Auth.CustomUserDetailsService;
+import com.smartcampus.service.Auth.CustomOAuth2UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -25,6 +26,9 @@ public class SecurityConfig {
 
     @Autowired
     private CustomUserDetailsService userDetailsService;
+
+    @Autowired
+    private CustomOAuth2UserService oauth2UserService;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -55,7 +59,11 @@ public class SecurityConfig {
                         .deleteCookies("JSESSIONID")
                         .logoutSuccessHandler((request, response, authentication) -> response.setStatus(200))
                         .permitAll())
-                .httpBasic(org.springframework.security.config.Customizer.withDefaults());
+                .httpBasic(org.springframework.security.config.Customizer.withDefaults())
+                .oauth2Login(oauth2 -> oauth2
+                        .userInfoEndpoint(userInfo -> userInfo.userService(oauth2UserService))
+                        .defaultSuccessUrl("http://localhost:5173", true) // Redirect to frontend after success
+                );
 
         return http.build();
     }

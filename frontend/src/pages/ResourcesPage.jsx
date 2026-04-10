@@ -15,6 +15,7 @@ const emptyForm = {
 };
 
 export default function ResourcesPage({ onLogout, user }) {
+  const canManageResources = String(user?.role || "").toUpperCase() === "ADMIN";
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -58,14 +59,22 @@ export default function ResourcesPage({ onLogout, user }) {
       capacity: Number(form.capacity),
     };
 
-    if (editingId) {
-      await resourceService.update(editingId, payload);
-    } else {
-      await resourceService.create(payload);
+    try {
+      if (editingId) {
+        await resourceService.update(editingId, payload);
+      } else {
+        await resourceService.create(payload);
+      }
+      closeModal();
+      load();
+    } catch (err) {
+      const msg =
+        err?.response?.data?.error ||
+        err?.response?.data?.message ||
+        err?.message ||
+        "Could not save resource.";
+      alert(msg);
     }
-
-    closeModal();
-    load();
   };
 
   const remove = async (id) => {
@@ -82,6 +91,7 @@ export default function ResourcesPage({ onLogout, user }) {
       <ResourceList
         items={items}
         loading={loading}
+        canManageResources={canManageResources}
         filters={filters}
         setFilters={setFilters}
         onDelete={remove}

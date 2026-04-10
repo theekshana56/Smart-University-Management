@@ -43,12 +43,21 @@ function ResourceCard({ resource, onClick }) {
   );
 }
 
-export default function ResourceList({ items, filters, setFilters, onEdit, onDelete, onSubmit }) {
+export default function ResourceList({
+  items,
+  filters,
+  setFilters,
+  onEdit,
+  onDelete,
+  onSubmit,
+  loading = false,
+  canManageResources = false,
+}) {
+  const colCount = canManageResources ? 7 : 5;
 
   const [selected, setSelected] = useState([]);
   const [view, setView] = useState("table");
   const [selectedResource, setSelectedResource] = useState(null);
-  const [loading, setLoading] = useState(false);
   const [showFormModal, setShowFormModal] = useState(false);
   const [form, setForm] = useState(DEFAULT_FORM);
   const [editingId, setEditingId] = useState(null);
@@ -60,6 +69,7 @@ export default function ResourceList({ items, filters, setFilters, onEdit, onDel
   };
 
   const bulkDelete = async () => {
+    if (!canManageResources) return;
     if (!confirm("Delete selected resources?")) return;
     for (let id of selected) {
       await resourceService.remove(id);
@@ -119,11 +129,14 @@ export default function ResourceList({ items, filters, setFilters, onEdit, onDel
   };
 
   const handleSubmit = (e) => {
-    if (onSubmit) onSubmit(e, form, editingId, () => {
-      setForm(DEFAULT_FORM);
-      setEditingId(null);
-      setShowFormModal(false);
-    });
+    e.preventDefault();
+    if (onSubmit) {
+      onSubmit(form, editingId, () => {
+        setForm(DEFAULT_FORM);
+        setEditingId(null);
+        setShowFormModal(false);
+      });
+    }
   };
 
   return (
@@ -154,7 +167,7 @@ export default function ResourceList({ items, filters, setFilters, onEdit, onDel
 
         <button className="btnGhost" onClick={downloadReport}>⬇ PDF</button>
 
-        {selected.length > 0 && (
+        {canManageResources && selected.length > 0 && (
           <button className="btnMini danger" onClick={bulkDelete}>
             🗑 Delete ({selected.length})
           </button>
@@ -167,36 +180,38 @@ export default function ResourceList({ items, filters, setFilters, onEdit, onDel
           <table className="table">
             <thead>
               <tr>
-                <th></th>
+                {canManageResources ? <th aria-label="Select row" /> : null}
                 <th>Name</th>
                 <th>Type</th>
                 <th>Capacity</th>
                 <th>Location</th>
                 <th>Status</th>
-                <th>Actions</th>
+                {canManageResources ? <th>Actions</th> : null}
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="7" className="muted">
+                  <td colSpan={colCount} className="muted">
                     <AppLoader label="Loading resources..." variant="table" />
                   </td>
                 </tr>
               ) : items.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="muted">No resources found.</td>
+                  <td colSpan={colCount} className="muted">No resources found.</td>
                 </tr>
               ) : (
                 items.map((r) => (
                   <tr key={r.id}>
-                    <td>
-                      <input
-                        type="checkbox"
-                        checked={selected.includes(r.id)}
-                        onChange={() => toggleSelect(r.id)}
-                      />
-                    </td>
+                    {canManageResources ? (
+                      <td>
+                        <input
+                          type="checkbox"
+                          checked={selected.includes(r.id)}
+                          onChange={() => toggleSelect(r.id)}
+                        />
+                      </td>
+                    ) : null}
                     <td>{r.name}</td>
                     <td>{r.type}</td>
                     <td>{r.capacity}</td>
@@ -206,12 +221,14 @@ export default function ResourceList({ items, filters, setFilters, onEdit, onDel
                         {r.status}
                       </span>
                     </td>
-                    <td>
-                      <div className="actions">
-                        <button className="btnMini" onClick={() => handleEditClick(r)}>Edit</button>
-                        <button className="btnMini danger" onClick={() => onDelete(r.id)}>Delete</button>
-                      </div>
-                    </td>
+                    {canManageResources ? (
+                      <td>
+                        <div className="actions">
+                          <button type="button" className="btnMini" onClick={() => handleEditClick(r)}>Edit</button>
+                          <button type="button" className="btnMini danger" onClick={() => onDelete(r.id)}>Delete</button>
+                        </div>
+                      </td>
+                    ) : null}
                   </tr>
                 ))
               )}
@@ -257,8 +274,8 @@ export default function ResourceList({ items, filters, setFilters, onEdit, onDel
         </div>
       )}
 
-      {/* ADD / EDIT FORM MODAL */}
-      {showFormModal && (
+      {/* ADD / EDIT FORM MODAL (admins only) */}
+      {canManageResources && showFormModal && (
         <div
           className="modal"
           onClick={(e) => { if (e.target === e.currentTarget) handleCancelEdit(); }}
@@ -284,38 +301,40 @@ export default function ResourceList({ items, filters, setFilters, onEdit, onDel
         </div>
       )}
 
-      {/* FLOATING ADD BUTTON */}
-      <button
-        onClick={() => {
-          setForm(DEFAULT_FORM);
-          setEditingId(null);
-          setShowFormModal(true);
-        }}
-        title="Add Resource"
-        style={{
-          position: "fixed",
-          bottom: "32px",
-          right: "32px",
-          width: "56px",
-          height: "56px",
-          borderRadius: "50%",
-          background: "var(--accent, #6366f1)",
-          color: "#fff",
-          fontSize: "28px",
-          border: "none",
-          cursor: "pointer",
-          boxShadow: "0 4px 16px rgba(0,0,0,0.18)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          zIndex: 1000,
-          transition: "transform 0.15s",
-        }}
-        onMouseEnter={e => e.currentTarget.style.transform = "scale(1.1)"}
-        onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
-      >
-        +
-      </button>
+      {canManageResources ? (
+        <button
+          type="button"
+          onClick={() => {
+            setForm(DEFAULT_FORM);
+            setEditingId(null);
+            setShowFormModal(true);
+          }}
+          title="Add Resource"
+          style={{
+            position: "fixed",
+            bottom: "32px",
+            right: "32px",
+            width: "56px",
+            height: "56px",
+            borderRadius: "50%",
+            background: "var(--accent, #6366f1)",
+            color: "#fff",
+            fontSize: "28px",
+            border: "none",
+            cursor: "pointer",
+            boxShadow: "0 4px 16px rgba(0,0,0,0.18)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+            transition: "transform 0.15s",
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.transform = "scale(1.1)"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
+        >
+          +
+        </button>
+      ) : null}
 
     </div>
   );

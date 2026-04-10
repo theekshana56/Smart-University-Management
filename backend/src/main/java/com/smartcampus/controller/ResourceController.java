@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.awt.Color;
 
@@ -25,6 +26,7 @@ public class ResourceController {
     private final ResourceService service;
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResourceResponseDTO create(@Valid @RequestBody ResourceRequestDTO dto) {
         return service.create(dto);
     }
@@ -157,11 +159,13 @@ public class ResourceController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResourceResponseDTO update(@PathVariable Long id, @Valid @RequestBody ResourceRequestDTO dto) {
         return service.update(id, dto);
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public void delete(@PathVariable Long id) {
         service.delete(id);
     }
