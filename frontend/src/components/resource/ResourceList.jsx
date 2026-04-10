@@ -3,6 +3,7 @@ import { useState } from "react";
 import { resourceService } from "../../services/resourceService";
 import AppLoader from "../common/AppLoader.jsx";
 import ResourceForm from "./ResourceForm.jsx";
+import { confirmPopup, showErrorPopup, showSuccessPopup } from "../../utils/popup";
 
 const TYPE_CONFIG = {
   LAB: { icon: "🔬", label: "Lab", cls: "lab" },
@@ -70,11 +71,20 @@ export default function ResourceList({
 
   const bulkDelete = async () => {
     if (!canManageResources) return;
-    if (!confirm("Delete selected resources?")) return;
+    const confirmed = await confirmPopup({
+      title: "Delete selected resources?",
+      text: "This action cannot be undone.",
+      confirmButtonText: "Yes, delete",
+      cancelButtonText: "Cancel",
+      icon: "warning",
+    });
+    if (!confirmed) return;
+
     for (let id of selected) {
       await resourceService.remove(id);
     }
     setSelected([]);
+    await showSuccessPopup("Resources deleted", "Selected resources were removed successfully.");
     window.location.reload();
   };
 
@@ -96,7 +106,7 @@ export default function ResourceList({
       window.URL.revokeObjectURL(url);
     } catch (e) {
       console.log(e);
-      alert("PDF download failed");
+      await showErrorPopup("Download failed", "PDF download failed.");
     }
   };
 

@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { promptPopup } from "../../utils/popup";
 
 export default function AdminAssignmentTool({ ticket, users, onAssign, onReject }) {
   const [technicianId, setTechnicianId] = useState(ticket.assignedTechnicianId || "");
@@ -13,7 +14,12 @@ export default function AdminAssignmentTool({ ticket, users, onAssign, onReject 
   };
 
   const handleReject = async () => {
-    const reason = window.prompt("Reason for rejection:");
+    const reason = await promptPopup({
+      title: "Reason for rejection",
+      inputPlaceholder: "Enter rejection reason",
+      confirmButtonText: "Reject ticket",
+      cancelButtonText: "Cancel",
+    });
     if (!reason || !reason.trim()) return;
     await onReject(ticket.id, reason.trim());
   };

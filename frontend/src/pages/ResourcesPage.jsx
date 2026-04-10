@@ -4,6 +4,7 @@ import ResourceList from "../components/resource/ResourceList.jsx";
 import { resourceService } from "../services/resourceService.js";
 import ResourceStats from "../components/resource/ResourceStats.jsx";
 import ResourceChart from "../components/resource/ResourceChart.jsx";
+import { confirmPopup, showErrorPopup, showWarningPopup } from "../utils/popup";
 
 const emptyForm = {
   name: "",
@@ -50,7 +51,7 @@ export default function ResourcesPage({ onLogout, user }) {
 
   const submit = async (form, editingId, closeModal) => {
     if (form.status === "ACTIVE" && form.availabilityWindows !== "AVAILABLE") {
-      alert("Conflict: Active resource must be AVAILABLE");
+      await showWarningPopup("Validation conflict", "Active resource must be AVAILABLE.");
       return;
     }
 
@@ -73,14 +74,31 @@ export default function ResourcesPage({ onLogout, user }) {
         err?.response?.data?.message ||
         err?.message ||
         "Could not save resource.";
-      alert(msg);
+      await showErrorPopup("Save failed", String(msg));
     }
   };
 
   const remove = async (id) => {
-    if (!confirm("Delete this resource?")) return;
-    await resourceService.remove(id);
-    load();
+    const confirmed = await confirmPopup({
+      title: "Delete this resource?",
+      text: "This action cannot be undone.",
+      confirmButtonText: "Yes, delete",
+      cancelButtonText: "Cancel",
+      icon: "warning",
+    });
+    if (!confirmed) return;
+
+    try {
+      await resourceService.remove(id);
+      load();
+    } catch (err) {
+      const msg =
+        err?.response?.data?.error ||
+        err?.response?.data?.message ||
+        err?.message ||
+        "Could not delete resource.";
+      await showErrorPopup("Delete failed", String(msg));
+    }
   };
 
   return (
