@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -93,11 +94,11 @@ class NotificationControllerTest {
                         "TICKET", 8L, true, LocalDateTime.now()));
         when(notificationService.markAllRead(3L)).thenReturn(2);
 
-        mockMvc.perform(put("/api/notifications/99/read"))
+        mockMvc.perform(put("/api/notifications/99/read").with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(99));
 
-        mockMvc.perform(put("/api/notifications/read-all"))
+        mockMvc.perform(put("/api/notifications/read-all").with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.updated").value(2));
 
@@ -124,6 +125,7 @@ class NotificationControllerTest {
                 .andExpect(jsonPath("$.ticketComments").value(true));
 
         mockMvc.perform(put("/api/notifications/preferences")
+                .with(csrf())
                 .contentType("application/json")
                 .content("{\"bookingUpdates\":true,\"ticketStatusChanges\":false,\"ticketComments\":true}"))
                 .andExpect(status().isOk())

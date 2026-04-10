@@ -6,6 +6,7 @@
   box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
 }
 
+/* FORM */
 .label{
   font-size: 13px;
   color: var(--muted);
@@ -44,6 +45,7 @@
   margin-top:12px;
 }
 
+/* BUTTONS */
 .btnPrimary{
   background: linear-gradient(135deg, #1f2937, #0b1220);
   color:#f8fafc;
@@ -76,6 +78,7 @@
   color: var(--danger);
 }
 
+/* TABLE */
 .table{
   width:100%;
   border-collapse: collapse;
@@ -102,16 +105,13 @@ th{
   margin-bottom: 10px;
 }
 
-.mini{
-  max-width: 170px;
-}
-
 .muted{
   text-align:center;
   color: var(--muted);
   padding: 18px;
 }
 
+/* STATUS PILLS */
 .pill{
   padding: 5px 10px;
   border-radius: 999px;
@@ -130,21 +130,24 @@ th{
   color: var(--danger);
 }
 
+.pill.warn{
+  background: rgba(255,193,7,0.15);
+  color: #f39c12;
+}
+
+/* ACTIONS */
 .actions{
   display:flex;
   gap:8px;
   flex-wrap: wrap;
 }
 
-/* Stats row (optional) */
-
-/* ===== Stats cards ===== */
+/* STATS */
 .statsRow{
   display:grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
   margin-bottom: 18px;
-  width: 100%;
 }
 
 .statCard{
@@ -161,27 +164,42 @@ th{
 
 .statLabel{
   color: var(--muted);
-  font-size: 15px;
   font-weight: 700;
 }
 
 .statValue{
   font-size: 22px;
   font-weight: 800;
-  margin-top: 18px;
+  margin-top: 10px;
 }
 
-/* ===== Chart ===== */
-.chartCard{
-  width: 100%;
-  margin-bottom: 22px;
-  min-height: 420px;
+/* MODAL */
+.modal{
+  position: fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background: rgba(0,0,0,0.5);
+  display:flex;
+  justify-content:center;
+  align-items:center;
 }
 
-.chartWrap{
-  width: 100%;
-  display: flex;
-  justify-content: flex-start;
+.modalContent{
+  background:#fff;
+  padding:20px;
+  border-radius:16px;
+  width:320px;
+}
+
+/* TYPE PILLS */
+.typePill{
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  display: inline-flex;
   align-items: center;
 }
 

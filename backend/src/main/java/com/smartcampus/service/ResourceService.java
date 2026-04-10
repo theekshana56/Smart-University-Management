@@ -42,9 +42,13 @@ public class ResourceService {
         return toResponse(repo.save(updated));
     }
 
+    // ✅ SOFT DELETE
     public void delete(Long id) {
-        if (!repo.existsById(id)) throw new RuntimeException("Resource not found: " + id);
-        repo.deleteById(id);
+        Resource existing = repo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Resource not found: " + id));
+
+        existing.setStatus("INACTIVE");
+        repo.save(existing);
     }
 
     private Resource toEntity(Long id, ResourceRequestDTO dto) {

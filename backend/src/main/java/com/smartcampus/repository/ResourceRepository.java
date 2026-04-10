@@ -1,4 +1,3 @@
-// backend/src/main/java/com/smartcampus/repository/ResourceRepository.java
 package com.smartcampus.repository;
 
 import com.smartcampus.model.Resource;
@@ -12,7 +11,8 @@ public interface ResourceRepository extends JpaRepository<Resource, Long> {
 
     @Query("""
       SELECT r FROM Resource r
-      WHERE (:type IS NULL OR r.type = :type)
+      WHERE r.status <> 'INACTIVE'
+        AND (:type IS NULL OR r.type = :type)
         AND (:minCap IS NULL OR r.capacity >= :minCap)
         AND (:location IS NULL OR LOWER(r.location) LIKE LOWER(CONCAT('%', :location, '%')))
         AND (:status IS NULL OR r.status = :status)

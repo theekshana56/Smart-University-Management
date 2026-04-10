@@ -14,8 +14,7 @@ import { notificationService } from "../services/notificationService.js";
 
 export default function LandingPage({ user, onLogout }) {
   const isAuthenticated = Boolean(user);
-  const managerRoles = new Set(["ADMIN", "STAFF", "LECTURER"]);
-  const canManageResources = managerRoles.has((user?.role || "").toUpperCase());
+  const canManageResources = (user?.role || "").toUpperCase() === "ADMIN";
   const [unreadCount, setUnreadCount] = useState(0);
   const [navOpen, setNavOpen] = useState(false);
 

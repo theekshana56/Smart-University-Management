@@ -1,4 +1,3 @@
-// backend/src/main/java/com/smartcampus/dto/ResourceRequestDTO.java
 package com.smartcampus.dto;
 
 import com.smartcampus.model.ResourceType;
@@ -25,7 +24,8 @@ public class ResourceRequestDTO {
     private String location;
 
     @NotBlank
-    @Pattern(regexp = "ACTIVE|OUT_OF_SERVICE", message = "status must be ACTIVE or OUT_OF_SERVICE")
+    @Pattern(regexp = "ACTIVE|OUT_OF_SERVICE|INACTIVE",
+             message = "status must be ACTIVE, OUT_OF_SERVICE or INACTIVE")
     private String status;
 
     @Size(max=255)
