@@ -21,6 +21,14 @@ const DEFAULT_FORM = {
   availabilityWindows: "AVAILABLE",
 };
 
+const getAvailabilityPillClass = (availabilityWindows) => {
+  const v = String(availabilityWindows || "").toUpperCase();
+  if (v === "AVAILABLE") return "pill ok";
+  if (v === "MAINTENANCE") return "pill warn";
+  if (v === "UNAVAILABLE") return "pill bad";
+  return "pill";
+};
+
 function ResourceCard({ resource, onClick }) {
   return (
     <div
@@ -232,7 +240,11 @@ export default function ResourceList({
                         {r.status}
                       </span>
                     </td>
-                    <td>{r.availabilityWindows}</td>
+                    <td>
+                      <span className={getAvailabilityPillClass(r.availabilityWindows)}>
+                        {r.availabilityWindows}
+                      </span>
+                    </td>
                     {canManageResources ? (
                       <td>
                         <div className="actions">
