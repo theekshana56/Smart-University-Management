@@ -1,11 +1,28 @@
 import Swal from "sweetalert2";
 
 const popup = Swal.mixin({
-  background: "#111827",
-  color: "#f9fafb",
-  confirmButtonColor: "#4f46e5",
-  cancelButtonColor: "#6b7280",
+  width: 520,
+  padding: "1.25rem 1.25rem 1rem",
+  background: "#ffffff",
+  color: "#0f172a",
+  backdrop: "rgba(15, 23, 42, 0.42)",
+  buttonsStyling: false,
   reverseButtons: true,
+  customClass: {
+    popup: "sumPopup",
+    title: "sumPopupTitle",
+    htmlContainer: "sumPopupText",
+    actions: "sumPopupActions",
+    confirmButton: "sumPopupBtn sumPopupBtnConfirm",
+    cancelButton: "sumPopupBtn sumPopupBtnCancel",
+    input: "sumPopupInput",
+  },
+  showClass: {
+    popup: "sumPopupShow",
+  },
+  hideClass: {
+    popup: "sumPopupHide",
+  },
 });
 
 export const showSuccessPopup = (title, text = "") =>

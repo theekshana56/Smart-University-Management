@@ -21,6 +21,14 @@ const DEFAULT_FORM = {
   availabilityWindows: "AVAILABLE",
 };
 
+const getAvailabilityPillClass = (availabilityWindows) => {
+  const v = String(availabilityWindows || "").toUpperCase();
+  if (v === "AVAILABLE") return "pill ok";
+  if (v === "MAINTENANCE") return "pill warn";
+  if (v === "UNAVAILABLE") return "pill bad";
+  return "pill";
+};
+
 function ResourceCard({ resource, onClick }) {
   return (
     <div
@@ -54,7 +62,7 @@ export default function ResourceList({
   loading = false,
   canManageResources = false,
 }) {
-  const colCount = canManageResources ? 7 : 5;
+  const colCount = canManageResources ? 8 : 6;
 
   const [selected, setSelected] = useState([]);
   const [view, setView] = useState("table");
@@ -196,6 +204,7 @@ export default function ResourceList({
                 <th>Capacity</th>
                 <th>Location</th>
                 <th>Status</th>
+                <th>Availability</th>
                 {canManageResources ? <th>Actions</th> : null}
               </tr>
             </thead>
@@ -229,6 +238,11 @@ export default function ResourceList({
                     <td>
                       <span className={r.status === "ACTIVE" ? "pill ok" : "pill bad"}>
                         {r.status}
+                      </span>
+                    </td>
+                    <td>
+                      <span className={getAvailabilityPillClass(r.availabilityWindows)}>
+                        {r.availabilityWindows}
                       </span>
                     </td>
                     {canManageResources ? (

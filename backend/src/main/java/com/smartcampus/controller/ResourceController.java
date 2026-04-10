@@ -42,7 +42,7 @@ public class ResourceController {
         return service.search(type, minCap, location, status, q);
     }
 
-    // ✅ PDF Report download (UPDATED - NO ID)
+    // PDF Report download (UPDATED - NO ID)
     @GetMapping(value = "/report/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
     public ResponseEntity<byte[]> downloadReportPdf(
             @RequestParam(required = false) ResourceType type,
@@ -78,12 +78,12 @@ public class ResourceController {
             document.add(new Paragraph("Total Records: " + list.size()));
             document.add(new Paragraph(" "));
 
-            // ✅ UPDATED TABLE (6 columns instead of 7)
+            //  UPDATED TABLE (6 columns instead of 7)
             PdfPTable table = new PdfPTable(6);
             table.setWidthPercentage(100);
             table.setWidths(new float[]{3.5f, 2.2f, 1.5f, 3.0f, 2.0f, 3.0f});
 
-            // ✅ HEADERS (NO ID)
+            //  HEADERS (NO ID)
             addHeader(table, "Name", headerColor);
             addHeader(table, "Type", headerColor);
             addHeader(table, "Capacity", headerColor);
