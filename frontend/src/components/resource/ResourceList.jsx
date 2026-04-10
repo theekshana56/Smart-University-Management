@@ -54,7 +54,7 @@ export default function ResourceList({
   loading = false,
   canManageResources = false,
 }) {
-  const colCount = canManageResources ? 7 : 5;
+  const colCount = canManageResources ? 8 : 6;
 
   const [selected, setSelected] = useState([]);
   const [view, setView] = useState("table");
@@ -196,6 +196,7 @@ export default function ResourceList({
                 <th>Capacity</th>
                 <th>Location</th>
                 <th>Status</th>
+                <th>Availability</th>
                 {canManageResources ? <th>Actions</th> : null}
               </tr>
             </thead>
@@ -231,6 +232,7 @@ export default function ResourceList({
                         {r.status}
                       </span>
                     </td>
+                    <td>{r.availabilityWindows}</td>
                     {canManageResources ? (
                       <td>
                         <div className="actions">
