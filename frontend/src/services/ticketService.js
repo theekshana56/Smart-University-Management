@@ -49,4 +49,35 @@ export const ticketService = {
     const response = await apiClient.delete(`/tickets/comments/${commentId}`);
     return response.data;
   },
+
+  async deleteResolvedTicket(ticketId) {
+    await apiClient.delete(`/tickets/${ticketId}`);
+  },
+
+  async downloadResolvedTicketPdf(ticketId) {
+    try {
+      const response = await apiClient.get(`/tickets/${ticketId}/pdf`, { responseType: "blob" });
+      const blob = response.data;
+      const ct = String(response.headers["content-type"] || "");
+      if (!ct.includes("application/pdf")) {
+        const msg = typeof blob?.text === "function" ? await blob.text() : "";
+        throw new Error(msg || "Server did not return a PDF");
+      }
+      const url = window.URL.createObjectURL(new Blob([blob], { type: "application/pdf" }));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `ticket-${ticketId}-resolved.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (e) {
+      const data = e?.response?.data;
+      if (data instanceof Blob && typeof data.text === "function") {
+        const msg = await data.text();
+        throw new Error(msg || e.message || "PDF download failed");
+      }
+      throw e;
+    }
+  },
 };

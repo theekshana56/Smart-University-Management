@@ -21,6 +21,18 @@ function statusPillStyle(status) {
   return { background: "#e5e7eb", color: "#111827" };
 }
 
+const adminBtn = {
+  fontSize: 12,
+  fontWeight: 600,
+  padding: "6px 12px",
+  borderRadius: 8,
+  border: "1px solid #cbd5e1",
+  background: "#fff",
+  color: "#334155",
+  cursor: "pointer",
+  fontFamily: "inherit",
+};
+
 export default function TicketTable({
   tickets,
   isAdmin,
@@ -36,25 +48,46 @@ export default function TicketTable({
   onCommentPost,
   onCommentEdit,
   onCommentDelete,
+  onAdminDeleteResolvedTicket,
+  onAdminDownloadResolvedPdf,
 }) {
+  const canAdminArchive = (status) =>
+    String(status || "").toUpperCase() === "RESOLVED" || String(status || "").toUpperCase() === "CLOSED";
+
   return (
     <div style={{ display: "grid", gap: 12 }}>
       {tickets.map((ticket) => (
         <div key={ticket.id} style={{ border: "1px solid #e5e7eb", borderRadius: 10, padding: 12 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", gap: 10, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", gap: 10, flexWrap: "wrap", alignItems: "flex-start" }}>
             <strong>#{ticket.id} - {ticket.category}</strong>
-            <span
-              style={{
-                ...statusPillStyle(ticket.status),
-                borderRadius: 999,
-                padding: "3px 10px",
-                fontSize: 12,
-                fontWeight: 700,
-                letterSpacing: 0.2,
-              }}
-            >
-              {ticket.status}
-            </span>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
+              {isAdmin && canAdminArchive(ticket.status) && typeof onAdminDownloadResolvedPdf === "function" ? (
+                <button type="button" style={adminBtn} onClick={() => onAdminDownloadResolvedPdf(ticket.id)}>
+                  Download PDF
+                </button>
+              ) : null}
+              {isAdmin && canAdminArchive(ticket.status) && typeof onAdminDeleteResolvedTicket === "function" ? (
+                <button
+                  type="button"
+                  style={{ ...adminBtn, borderColor: "#fecaca", color: "#b91c1c", background: "#fef2f2" }}
+                  onClick={() => onAdminDeleteResolvedTicket(ticket.id)}
+                >
+                  Delete ticket
+                </button>
+              ) : null}
+              <span
+                style={{
+                  ...statusPillStyle(ticket.status),
+                  borderRadius: 999,
+                  padding: "3px 10px",
+                  fontSize: 12,
+                  fontWeight: 700,
+                  letterSpacing: 0.2,
+                }}
+              >
+                {ticket.status}
+              </span>
+            </div>
           </div>
           {isAdmin ? (
             <div

@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -61,12 +62,46 @@ public class TicketService {
     public List<Ticket> listForUser(User user) {
         String role = user.getRole() == null ? "" : user.getRole().toUpperCase(Locale.ROOT);
         if ("ADMIN".equals(role) || "STAFF".equals(role)) {
-            return ticketRepository.findAll();
+            return sortNewestFirst(ticketRepository.findAll());
         }
         if ("TECHNICIAN".equals(role)) {
-            return ticketRepository.findByAssignedTechnicianId(user.getId());
+            return sortNewestFirst(ticketRepository.findByAssignedTechnicianId(user.getId()));
         }
-        return ticketRepository.findByCreatedById(user.getId());
+        return sortNewestFirst(ticketRepository.findByCreatedById(user.getId()));
+    }
+
+    private List<Ticket> sortNewestFirst(List<Ticket> tickets) {
+        return tickets.stream()
+                .sorted(Comparator.comparing(Ticket::getCreatedAt, Comparator.nullsLast(Comparator.naturalOrder())).reversed())
+                .toList();
+    }
+
+    @Transactional
+    public void deleteResolvedTicket(Long ticketId, User actor) {
+        requireRole(actor, "ADMIN");
+        Ticket ticket = getTicket(ticketId);
+        TicketStatus st = ticket.getStatus();
+        if (st != TicketStatus.RESOLVED && st != TicketStatus.CLOSED) {
+            throw new IllegalArgumentException("Only resolved or closed tickets can be deleted");
+        }
+        ticketRepository.delete(ticket);
+    }
+
+    @Transactional(readOnly = true)
+    public byte[] exportResolvedTicketPdf(Long ticketId, User actor) {
+        requireRole(actor, "ADMIN");
+        Ticket ticket = ticketRepository.findDetailById(ticketId)
+                .orElseThrow(() -> new IllegalArgumentException("Ticket not found"));
+        TicketStatus st = ticket.getStatus();
+        if (st != TicketStatus.RESOLVED && st != TicketStatus.CLOSED) {
+            throw new IllegalArgumentException("PDF export is only available for resolved or closed tickets");
+        }
+        List<Comment> comments = commentRepository.findByTicketIdWithAuthorsAsc(ticketId);
+        try {
+            return TicketPdfBuilder.build(ticket, comments);
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to generate PDF: " + e.getMessage(), e);
+        }
     }
 
     @Transactional

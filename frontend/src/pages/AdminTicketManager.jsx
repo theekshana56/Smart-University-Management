@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { ticketService } from "../services/ticketService";
 import { adminUserService } from "../services/adminUserService";
 import TicketTable from "../components/tickets/TicketTable";
-import { confirmPopup, promptPopup } from "../utils/popup";
+import { confirmPopup, promptPopup, showErrorPopup } from "../utils/popup";
 
 const FILTERS = [
   {
@@ -279,6 +279,30 @@ export default function AdminTicketManager({ user }) {
               if (confirmed) {
                 await ticketService.deleteComment(commentId);
                 await load();
+              }
+            }}
+            onAdminDownloadResolvedPdf={async (ticketId) => {
+              try {
+                await ticketService.downloadResolvedTicketPdf(ticketId);
+              } catch (e) {
+                showErrorPopup("Could not download PDF", String(e?.message || e?.response?.data || "Request failed"));
+              }
+            }}
+            onAdminDeleteResolvedTicket={async (ticketId) => {
+              const confirmed = await confirmPopup({
+                title: "Delete this ticket?",
+                text: "Only resolved or closed tickets can be removed. This cannot be undone.",
+                confirmButtonText: "Yes, delete ticket",
+                cancelButtonText: "Cancel",
+                icon: "warning",
+              });
+              if (confirmed) {
+                try {
+                  await ticketService.deleteResolvedTicket(ticketId);
+                  await load();
+                } catch (e) {
+                  showErrorPopup("Could not delete", String(e?.response?.data || e?.message || "Request failed"));
+                }
               }
             }}
           />
