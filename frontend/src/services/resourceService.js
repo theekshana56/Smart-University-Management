@@ -6,7 +6,10 @@ export const resourceService = {
   update: (id, payload) => apiClient.put(`/resources/${id}`, payload).then(r => r.data),
   remove: (id) => apiClient.delete(`/resources/${id}`),
 
-  // ✅ PDF report
+  //  PDF report
   downloadReportPdf: (params) =>
-    apiClient.get("/resources/report/pdf", { params, responseType: "blob" }).then(r => r.data),
+  apiClient.get("/resources/report/pdf", {
+    params,
+    responseType: "blob"
+  }).then(r => r.data),
 };

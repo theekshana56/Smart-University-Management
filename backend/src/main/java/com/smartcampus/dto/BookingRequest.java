@@ -11,7 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
+@Data // getters and setters
 @NoArgsConstructor
 @AllArgsConstructor
 public class BookingRequest {

@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import "./resource.css";
 
@@ -10,8 +11,34 @@ import notificationsIcon from "../../Assests/notification.png";
 import profileIcon from "../../Assests/profile.svg";
 import settingsIcon from "../../Assests/Setting.png";
 import BrandLogo from "../common/BrandLogo.jsx";
+import { notificationService } from "../../services/notificationService.js";
 
 export default function ResourceLayout({ children, onLogout, user }) {
+  const [unreadCount, setUnreadCount] = useState(0);
+  const isAdmin = user?.role === "ADMIN";
+  const isTechnician = user?.role === "TECHNICIAN";
+
+  useEffect(() => {
+    if (!user || isTechnician) return;
+    let isMounted = true;
+
+    const loadUnread = async () => {
+      try {
+        const count = await notificationService.unreadCount();
+        if (isMounted) setUnreadCount(Number(count) || 0);
+      } catch (error) {
+        if (isMounted) setUnreadCount(0);
+      }
+    };
+
+    loadUnread();
+    const interval = setInterval(loadUnread, 30000);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, [user?.id, isTechnician]);
+
   return (
     <div className="appShell">
       <aside className="sideNav">
@@ -45,17 +72,19 @@ export default function ResourceLayout({ children, onLogout, user }) {
         </div>
 
         <nav className="sideNavMenu">
-          <NavLink
-            to="/"
-            end
-            className={({ isActive }) =>
-              isActive ? "sideNavItem active" : "sideNavItem"
-            }
-          >
-            <img src={homeIcon} alt="" className="sideNavIcon" />
-            <span className="sideNavLabel">Home</span>
-          </NavLink>
-          {user?.role === "ADMIN" && (
+          {!isTechnician && (
+            <NavLink
+              to="/"
+              end
+              className={({ isActive }) =>
+                isActive ? "sideNavItem active" : "sideNavItem"
+              }
+            >
+              <img src={homeIcon} alt="" className="sideNavIcon" />
+              <span className="sideNavLabel">Home</span>
+            </NavLink>
+          )}
+          {isAdmin && (
             <NavLink
               to="/admin"
               className={({ isActive }) =>
@@ -66,24 +95,28 @@ export default function ResourceLayout({ children, onLogout, user }) {
               <span className="sideNavLabel">Admin Dashboard</span>
             </NavLink>
           )}
-          <NavLink
-            to="/resources"
-            className={({ isActive }) =>
-              isActive ? "sideNavItem active" : "sideNavItem"
-            }
-          >
-            <img src={resourcesIcon} alt="" className="sideNavIcon" />
-            <span className="sideNavLabel">Resources</span>
-          </NavLink>
-          <NavLink
-            to="/bookings"
-            className={({ isActive }) =>
-              isActive ? "sideNavItem active" : "sideNavItem"
-            }
-          >
-            <img src={bookingsIcon} alt="" className="sideNavIcon" />
-            <span className="sideNavLabel">Bookings</span>
-          </NavLink>
+          {!isTechnician && (
+            <NavLink
+              to="/resources"
+              className={({ isActive }) =>
+                isActive ? "sideNavItem active" : "sideNavItem"
+              }
+            >
+              <img src={resourcesIcon} alt="" className="sideNavIcon" />
+              <span className="sideNavLabel">Resources</span>
+            </NavLink>
+          )}
+          {!isTechnician && (
+            <NavLink
+              to="/bookings"
+              className={({ isActive }) =>
+                isActive ? "sideNavItem active" : "sideNavItem"
+              }
+            >
+              <img src={bookingsIcon} alt="" className="sideNavIcon" />
+              <span className="sideNavLabel">Bookings</span>
+            </NavLink>
+          )}
           <NavLink
             to="/tickets"
             className={({ isActive }) =>
@@ -93,25 +126,34 @@ export default function ResourceLayout({ children, onLogout, user }) {
             <img src={ticketsIcon} alt="" className="sideNavIcon" />
             <span className="sideNavLabel">Tickets</span>
           </NavLink>
-          <NavLink
-            to="/notifications"
-            className={({ isActive }) =>
-              isActive ? "sideNavItem active" : "sideNavItem"
-            }
-          >
-            <img src={notificationsIcon} alt="" className="sideNavIcon" />
-            <span className="sideNavLabel">Notifications</span>
-          </NavLink>
-          <NavLink
-            to="/profile"
-            className={({ isActive }) =>
-              isActive ? "sideNavItem active" : "sideNavItem"
-            }
-          >
-            <img src={profileIcon} alt="" className="sideNavIcon" />
-            <span className="sideNavLabel">Profile</span>
-          </NavLink>
-          {user?.role === "ADMIN" && (
+          {!isTechnician && (
+            <NavLink
+              to="/notifications"
+              className={({ isActive }) =>
+                isActive ? "sideNavItem active" : "sideNavItem"
+              }
+            >
+              <span className="sideNavIconWrap">
+                <img src={notificationsIcon} alt="" className="sideNavIcon" />
+                {unreadCount > 0 ? (
+                  <span className="notifyBadge">{unreadCount > 99 ? "99+" : unreadCount}</span>
+                ) : null}
+              </span>
+              <span className="sideNavLabel">Notifications</span>
+            </NavLink>
+          )}
+          {!isTechnician && (
+            <NavLink
+              to="/profile"
+              className={({ isActive }) =>
+                isActive ? "sideNavItem active" : "sideNavItem"
+              }
+            >
+              <img src={profileIcon} alt="" className="sideNavIcon" />
+              <span className="sideNavLabel">Profile</span>
+            </NavLink>
+          )}
+          {isAdmin && (
             <NavLink
               to="/manage-users"
               className={({ isActive }) =>
@@ -122,7 +164,7 @@ export default function ResourceLayout({ children, onLogout, user }) {
               <span className="sideNavLabel">Manage Users</span>
             </NavLink>
           )}
-          {user?.role === "ADMIN" && (
+          {isAdmin && (
             <NavLink
               to="/settings"
               className={({ isActive }) =>

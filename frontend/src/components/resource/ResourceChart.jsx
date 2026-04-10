@@ -1,4 +1,4 @@
-import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { PieChart, Pie, Cell, Tooltip, Legend } from "recharts";
 
 export default function ResourceChart({ items }) {
   const data = [
@@ -12,41 +12,50 @@ export default function ResourceChart({ items }) {
 
   return (
     <div className="card chartCard">
-      <h3 className="chartTitle">Resource Types</h3>
+      <h3 style={{ marginBottom: 10 }}>Resource Types</h3>
 
       <div className="chartWrap">
-        <ResponsiveContainer width="100%" height={300}>
-          <PieChart>
-            <Pie
-              data={data}
-              dataKey="value"
-              nameKey="name"
-              cx="34%"
-              cy="50%"
-              outerRadius={100}
-              label
-            >
-              {data.map((entry, index) => (
-                <Cell key={index} fill={colors[index]} />
-              ))}
-            </Pie>
+        <PieChart width={760} height={280}>
+          <Pie
+            data={data}
+            dataKey="value"
+            nameKey="name"
+            cx={220}
+            cy={135}
+            outerRadius={110}
+            label
+          >
+            {data.map((entry, index) => (
+              <Cell key={index} fill={colors[index]} />
+            ))}
+          </Pie>
 
-            <Tooltip />
+          <Tooltip
+            contentStyle={{
+              background: 'var(--panel)',
+              borderColor: 'var(--border)',
+              borderRadius: '12px',
+              color: 'var(--text)'
+            }}
+            itemStyle={{ color: 'var(--text)' }}
+          />
 
-            <Legend
-              layout="vertical"
-              verticalAlign="middle"
-              align="right"
-              iconType="circle"
-              wrapperStyle={{
-                right: 20,
-                lineHeight: "24px",
-                fontSize: "14px",
-                fontWeight: 600,
-              }}
-            />
-          </PieChart>
-        </ResponsiveContainer>
+          <Legend
+            layout="vertical"
+            verticalAlign="middle"
+            align="right"
+            iconType="circle"
+            formatter={(value) => <span style={{ color: 'var(--text)' }}>{value}</span>}
+            wrapperStyle={{
+              right: 40,
+              top: "50%",
+              transform: "translateY(-50%)",
+              lineHeight: "28px",
+              fontSize: "16px",
+              fontWeight: 600,
+            }}
+          />
+        </PieChart>
       </div>
     </div>
   );

@@ -15,11 +15,14 @@ import AdminDashboardPage from "./pages/AdminDashboardPage";
 import LandingPage from "./pages/LandingPage";
 import AppLoader from "./components/common/AppLoader";
 
+const AUTH_HEADER_STORAGE_KEY = "sum_auth_header";
+
 function AppRoutes({ user, onLogin, onLogout, onProfileUpdate }) {
   const location = useLocation();
   const [routeLoading, setRouteLoading] = useState(false);
   const firstRender = useRef(true);
   const isAuthenticated = Boolean(user);
+  const isTechnician = user?.role === "TECHNICIAN";
 
   useEffect(() => {
     if (firstRender.current) {
@@ -38,6 +41,8 @@ function AppRoutes({ user, onLogin, onLogout, onProfileUpdate }) {
 
   const renderProtected = (element) =>
     isAuthenticated ? element : <Navigate to="/" replace />;
+  const renderNonTechnicianProtected = (element) =>
+    !isAuthenticated ? <Navigate to="/" replace /> : isTechnician ? <Navigate to="/tickets" replace /> : element;
 
   return (
     <>
@@ -45,7 +50,11 @@ function AppRoutes({ user, onLogin, onLogout, onProfileUpdate }) {
         <Route
           path="/"
           element={
-            <LandingPage user={user} onLogout={onLogout} />
+            isAuthenticated && isTechnician ? (
+              <Navigate to="/tickets" replace />
+            ) : (
+              <LandingPage user={user} onLogout={onLogout} />
+            )
           }
         />
 
@@ -86,11 +95,11 @@ function AppRoutes({ user, onLogin, onLogout, onProfileUpdate }) {
 
         <Route
           path="/resources"
-          element={renderProtected(<ResourcesPage onLogout={onLogout} user={user} />)}
+          element={renderNonTechnicianProtected(<ResourcesPage onLogout={onLogout} user={user} />)}
         />
         <Route
           path="/bookings"
-          element={renderProtected(<BookingsPage onLogout={onLogout} user={user} />)}
+          element={renderNonTechnicianProtected(<BookingsPage onLogout={onLogout} user={user} />)}
         />
         <Route
           path="/tickets"
@@ -98,11 +107,11 @@ function AppRoutes({ user, onLogin, onLogout, onProfileUpdate }) {
         />
         <Route
           path="/notifications"
-          element={renderProtected(<NotificationsPage onLogout={onLogout} user={user} />)}
+          element={renderNonTechnicianProtected(<NotificationsPage onLogout={onLogout} user={user} />)}
         />
         <Route
           path="/profile"
-          element={renderProtected(
+          element={renderNonTechnicianProtected(
             <ProfilePage onLogout={onLogout} user={user} onProfileUpdate={onProfileUpdate} />
           )}
         />
@@ -141,13 +150,22 @@ export default function App() {
   const [checkingAuth, setCheckingAuth] = useState(true);
 
   useEffect(() => {
+    const savedAuthHeader = localStorage.getItem(AUTH_HEADER_STORAGE_KEY);
+    if (savedAuthHeader) {
+      axios.defaults.headers.common["Authorization"] = savedAuthHeader;
+      apiClient.defaults.headers.common["Authorization"] = savedAuthHeader;
+    }
+
     // Check if the user is already logged in via session (OAuth2)
     const checkUser = async () => {
       try {
         const response = await apiClient.get('/auth/me');
         setUser(response.data);
       } catch (err) {
-        // Not logged in or session expired
+        // Not logged in or session expired; clear stale basic auth header if any.
+        localStorage.removeItem(AUTH_HEADER_STORAGE_KEY);
+        delete axios.defaults.headers.common['Authorization'];
+        delete apiClient.defaults.headers.common['Authorization'];
       } finally {
         setCheckingAuth(false);
       }
@@ -162,6 +180,7 @@ export default function App() {
       console.warn("Server-side logout failed or session already expired", err);
     }
     setUser(null);
+    localStorage.removeItem(AUTH_HEADER_STORAGE_KEY);
     delete axios.defaults.headers.common['Authorization'];
     delete apiClient.defaults.headers.common['Authorization'];
   };

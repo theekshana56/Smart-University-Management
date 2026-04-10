@@ -23,11 +23,17 @@ import com.smartcampus.model.Auth.User;
 import com.smartcampus.repository.Auth.UserRepository;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+
+import com.smartcampus.repository.BookingRepository;
+import com.smartcampus.repository.CommentRepository;
+import com.smartcampus.repository.NotificationRepository;
+import com.smartcampus.repository.TicketRepository;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -38,6 +44,18 @@ public class AuthController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private BookingRepository bookingRepository;
+
+    @Autowired
+    private NotificationRepository notificationRepository;
+
+    @Autowired
+    private CommentRepository commentRepository;
+
+    @Autowired
+    private TicketRepository ticketRepository;
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@RequestBody SignupRequest request) {
@@ -178,24 +196,29 @@ public class AuthController {
         String email = resolveEmail(authentication);
         String nameFallback = resolveName(authentication);
         String pictureFallback = resolvePicture(authentication);
+        boolean googleLogin = isGoogleLogin(authentication);
 
         if (email != null) {
             Optional<User> userOpt = userRepository.findByEmail(email);
             if (userOpt.isPresent()) {
                 User user = userOpt.get();
                 return new LoginResponse(
+                        user.getId(),
                         user.getName(),
                         user.getEmail(),
                         user.getRole(),
-                        user.getPictureUrl());
+                        user.getPictureUrl(),
+                        googleLogin);
             }
         }
 
         return new LoginResponse(
+                null,
                 nameFallback,
                 email,
                 "USER",
-                pictureFallback);
+                pictureFallback,
+                googleLogin);
     }
 
     @PutMapping("/me/profile")
@@ -212,9 +235,27 @@ public class AuthController {
         }
 
         User user = userOpt.get();
+        boolean googleLogin = isGoogleLogin(authentication);
 
         if (request.getName() == null || request.getName().trim().isEmpty()) {
             return ResponseEntity.badRequest().body("Name is required");
+        }
+
+        String requestedEmail = request.getEmail() == null ? user.getEmail() : request.getEmail().trim();
+        if (requestedEmail.isEmpty()) {
+            return ResponseEntity.badRequest().body("Email is required");
+        }
+
+        if (googleLogin && !requestedEmail.equalsIgnoreCase(user.getEmail())) {
+            return ResponseEntity.badRequest().body("Google login accounts cannot change email address.");
+        }
+
+        if (!requestedEmail.equalsIgnoreCase(user.getEmail())) {
+            Optional<User> emailOwner = userRepository.findByEmail(requestedEmail);
+            if (emailOwner.isPresent()) {
+                return ResponseEntity.badRequest().body("Error: Email is already in use!");
+            }
+            user.setEmail(requestedEmail);
         }
 
         user.setName(request.getName().trim());
@@ -226,10 +267,39 @@ public class AuthController {
         userRepository.save(user);
 
         return ResponseEntity.ok(new LoginResponse(
+                user.getId(),
                 user.getName(),
                 user.getEmail(),
                 user.getRole(),
-                user.getPictureUrl()));
+                user.getPictureUrl(),
+                googleLogin));
+    }
+
+    @DeleteMapping("/me")
+    @Transactional
+    public ResponseEntity<?> deleteCurrentUserAccount(Authentication authentication) {
+        String email = resolveEmail(authentication);
+        if (email == null || email.isBlank()) {
+            return ResponseEntity.status(401).body("Unauthorized");
+        }
+
+        Optional<User> userOpt = userRepository.findByEmail(email);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(404).body("User not found");
+        }
+
+        User user = userOpt.get();
+        Long userId = user.getId();
+
+        // Remove dependent records first to avoid FK violations.
+        notificationRepository.deleteAllByRecipientId(userId);
+        commentRepository.deleteAllByAuthorId(userId);
+        bookingRepository.deleteAllByUserId(userId);
+        ticketRepository.clearAssignedTechnician(userId);
+        ticketRepository.deleteAllCreatedBy(userId);
+        userRepository.delete(user);
+
+        return ResponseEntity.ok("Your account has been deleted.");
     }
 
     private String resolveEmail(Authentication authentication) {
@@ -293,6 +363,16 @@ public class AuthController {
         }
         Optional<User> userOpt = userRepository.findByEmail(email);
         return userOpt.isPresent() && "ADMIN".equalsIgnoreCase(userOpt.get().getRole());
+    }
+
+    private boolean isGoogleLogin(Authentication authentication) {
+        if (authentication == null) {
+            return false;
+        }
+        if (authentication instanceof OAuth2AuthenticationToken) {
+            return true;
+        }
+        return authentication.getPrincipal() instanceof OAuth2User;
     }
 
     private AdminUserResponse toAdminUserResponse(User user) {

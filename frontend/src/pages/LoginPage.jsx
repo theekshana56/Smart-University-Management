@@ -1,14 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 import { apiClient } from "../api/apiClient";
 import AppLoader from "../components/common/AppLoader.jsx";
 import BrandLogo from "../components/common/BrandLogo.jsx";
 import "./login.css";
 
-export default function LoginPage({ onLogin, initialMode = "login" }) {
-  const navigate = useNavigate();
-  const [isLogin, setIsLogin] = useState(initialMode !== "signup");
+const AUTH_HEADER_STORAGE_KEY = "sum_auth_header";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8085/api";
+const BACKEND_BASE_URL = API_BASE_URL.replace(/\/api\/?$/, "");
+
+export default function LoginPage({ onLogin }) {
+  const [isLogin, setIsLogin] = useState(true);
   const [name, setName] = useState("");
   const [pictureUrl, setPictureUrl] = useState("");
   const [email, setEmail] = useState("");
@@ -16,12 +18,6 @@ export default function LoginPage({ onLogin, initialMode = "login" }) {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    setIsLogin(initialMode !== "signup");
-    setError("");
-    setSuccess("");
-  }, [initialMode]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -33,15 +29,16 @@ export default function LoginPage({ onLogin, initialMode = "login" }) {
       if (isLogin) {
         const authHeader = "Basic " + btoa(email + ":" + password);
 
-        const response = await axios.get("http://localhost:8085/api/auth/me", {
+        const response = await axios.get(`${API_BASE_URL}/auth/me`, {
           headers: { Authorization: authHeader },
         });
 
         axios.defaults.headers.common["Authorization"] = authHeader;
         apiClient.defaults.headers.common["Authorization"] = authHeader;
+        localStorage.setItem(AUTH_HEADER_STORAGE_KEY, authHeader);
         onLogin(response.data);
       } else {
-        const response = await axios.post("http://localhost:8085/api/auth/signup", {
+        const response = await axios.post(`${API_BASE_URL}/auth/signup`, {
           name,
           email,
           password,
@@ -65,21 +62,6 @@ export default function LoginPage({ onLogin, initialMode = "login" }) {
   return (
     <div className="loginPage">
       <div className={`loginCard ${isLogin ? "modeSignIn" : "modeSignUp"}`}>
-        <button
-          type="button"
-          className="loginBackBtn"
-          onClick={() => {
-            if (window.history.length > 1) {
-              navigate(-1);
-            } else {
-              navigate("/", { replace: true });
-            }
-          }}
-        >
-          <span aria-hidden="true">←</span>
-          Back
-        </button>
-
         <BrandLogo className="loginBrand" />
 
         <div className="loginBadge" aria-hidden="true">
@@ -205,7 +187,7 @@ export default function LoginPage({ onLogin, initialMode = "login" }) {
             <button
               type="button"
               onClick={() => {
-                window.location.href = "http://localhost:8085/oauth2/authorization/google";
+                window.location.href = `${BACKEND_BASE_URL}/oauth2/authorization/google`;
               }}
               className="loginGoogleBtn"
             >

@@ -1,11 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import ResourceLayout from '../components/resource/ResourceLayout';
 import { bookingService } from '../services/bookingService';
+import { resourceService } from '../services/resourceService';
+import {
+  confirmPopup,
+  showErrorPopup,
+  showSuccessPopup,
+  showWarningPopup,
+} from '../utils/popup';
 import '../components/resource/table.css';
 
 export default function BookingsPage({ onLogout, user }) {
+  const isAdmin = String(user?.role || '').toUpperCase() === 'ADMIN';
   const [myBookings, setMyBookings] = useState([]);
   const [allBookings, setAllBookings] = useState([]);
+  const [resources, setResources] = useState([]);
+  const [unavailableResourceIds, setUnavailableResourceIds] = useState([]);
+  const [adminFilters, setAdminFilters] = useState({
+    status: '',
+    date: '',
+    resourceId: '',
+    userId: ''
+  });
   const [formData, setFormData] = useState({
     resourceId: '',
     date: '',
@@ -15,14 +31,19 @@ export default function BookingsPage({ onLogout, user }) {
     attendees: ''
   });
   const [rejectionReasons, setRejectionReasons] = useState({});
+  const [adminLoadError, setAdminLoadError] = useState('');
+  const selectedResource = resources.find((r) => String(r.id) === String(formData.resourceId));
+  const selectedResourceCapacity = selectedResource?.capacity || '';
+  const bookedResources = resources.filter((r) => unavailableResourceIds.includes(r.id));
 
   useEffect(() => {
-    if (user?.role !== 'ADMIN') {
+    if (!isAdmin) {
       loadMyBookings();
+      loadResources();
     } else {
       loadAllBookings();
     }
-  }, [user]);
+  }, [user, isAdmin]);
 
   const loadMyBookings = async () => {
     try {
@@ -35,7 +56,51 @@ export default function BookingsPage({ onLogout, user }) {
 
   const loadAllBookings = async () => {
     try {
-      const data = await bookingService.getAllBookings();
+      setAdminLoadError('');
+      const data = await bookingService.getAllBookings(adminFilters);
+      setAllBookings(data);
+    } catch (error) {
+      console.error("Error loading all bookings", error);
+      setAllBookings([]);
+      setAdminLoadError(
+        error.response?.data?.error ||
+        error.response?.data?.message ||
+        (typeof error.response?.data === 'string' ? error.response.data : '') ||
+        `Failed to load admin bookings (status ${error.response?.status || 'unknown'})`
+      );
+    }
+  };
+
+  const loadResources = async () => {
+    try {
+      const data = await resourceService.list({});
+      const activeResources = Array.isArray(data)
+        ? data.filter((r) => String(r?.status || '').toUpperCase() === 'ACTIVE')
+        : [];
+      setResources(activeResources);
+    } catch (error) {
+      console.error("Error loading resources", error);
+      setResources([]);
+    }
+  };
+
+  const handleAdminFilterChange = (e) => {
+    setAdminFilters((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value
+    }));
+  };
+
+  const applyAdminFilters = async (e) => {
+    e.preventDefault();
+    await loadAllBookings();
+  };
+
+  const clearAdminFilters = async () => {
+    const resetFilters = { status: '', date: '', resourceId: '', userId: '' };
+    setAdminFilters(resetFilters);
+    try {
+      const data = await bookingService.getAllBookings(resetFilters);
       setAllBookings(data);
     } catch (error) {
       console.error("Error loading all bookings", error);
@@ -43,18 +108,74 @@ export default function BookingsPage({ onLogout, user }) {
   };
 
   const handleFormChange = (e) => {
+    const { name, value } = e.target;
+    if (name === 'attendees' && selectedResourceCapacity) {
+      const numericValue = Number(value);
+      if (!Number.isNaN(numericValue) && numericValue > selectedResourceCapacity) {
+        setFormData({
+          ...formData,
+          attendees: String(selectedResourceCapacity)
+        });
+        return;
+      }
+    }
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [name]: value
     });
   };
+
+  useEffect(() => {
+    if (!selectedResourceCapacity || !formData.attendees) return;
+    const currentAttendees = Number(formData.attendees);
+    if (!Number.isNaN(currentAttendees) && currentAttendees > selectedResourceCapacity) {
+      setFormData((prev) => ({ ...prev, attendees: String(selectedResourceCapacity) }));
+    }
+  }, [selectedResourceCapacity, formData.attendees]);
+
+  useEffect(() => {
+    if (isAdmin) return;
+    const { date, startTime, endTime } = formData;
+    if (!date || !startTime || !endTime) {
+      setUnavailableResourceIds([]);
+      return;
+    }
+    if (endTime <= startTime) {
+      setUnavailableResourceIds([]);
+      return;
+    }
+
+    const loadUnavailableResources = async () => {
+      try {
+        const ids = await bookingService.getUnavailableResourceIds({ date, startTime, endTime });
+        const normalizedIds = Array.isArray(ids) ? ids.map((id) => Number(id)) : [];
+        setUnavailableResourceIds(normalizedIds);
+      } catch (error) {
+        console.error("Error loading unavailable resources", error);
+        setUnavailableResourceIds([]);
+      }
+    };
+
+    loadUnavailableResources();
+  }, [formData.date, formData.startTime, formData.endTime, isAdmin]);
+
+  useEffect(() => {
+    if (!formData.resourceId) return;
+    if (unavailableResourceIds.includes(Number(formData.resourceId))) {
+      setFormData((prev) => ({ ...prev, resourceId: '' }));
+      showWarningPopup(
+        'Resource unavailable',
+        'Selected resource is already booked for this time slot. Please choose another.'
+      );
+    }
+  }, [unavailableResourceIds, formData.resourceId]);
 
   const handleCreateBooking = async (e) => {
     e.preventDefault();
     try {
       const payload = { ...formData, attendees: Number(formData.attendees) };
       await bookingService.createBooking(payload);
-      alert('Booking created successfully');
+      await showSuccessPopup('Booking created', 'Your booking request was submitted successfully.');
       setFormData({
         resourceId: '',
         date: '',
@@ -74,47 +195,55 @@ export default function BookingsPage({ onLogout, user }) {
           errorMessage = String(error.response.data);
         }
       }
-      alert("Error: " + errorMessage);
+      await showErrorPopup('Booking failed', errorMessage);
     }
   };
 
   const handleCancelBooking = async (id) => {
-    if (!window.confirm("Are you sure you want to cancel this booking?")) return;
+    const confirmed = await confirmPopup({
+      title: 'Cancel this booking?',
+      text: 'This action will mark the booking as cancelled.',
+      confirmButtonText: 'Yes, cancel booking',
+      cancelButtonText: 'Keep booking',
+      icon: 'warning',
+    });
+    if (!confirmed) return;
+
     try {
       await bookingService.cancelBooking(id);
-      alert('Booking cancelled');
+      await showSuccessPopup('Booking cancelled', 'The booking was cancelled successfully.');
       loadMyBookings();
     } catch (error) {
       console.error(error);
-      alert('Failed to cancel booking');
+      await showErrorPopup('Cancel failed', 'Failed to cancel booking.');
     }
   };
 
   const handleApproveBooking = async (id) => {
     try {
       await bookingService.approveBooking(id);
-      alert('Booking approved');
+      await showSuccessPopup('Booking approved', 'The booking request was approved.');
       loadAllBookings();
     } catch (error) {
       console.error(error);
-      alert('Failed to approve booking');
+      await showErrorPopup('Approve failed', 'Failed to approve booking.');
     }
   };
 
   const handleRejectBooking = async (id) => {
     const reason = rejectionReasons[id];
     if (!reason) {
-      alert("Please provide a rejection reason");
+      await showWarningPopup('Reason required', 'Please provide a rejection reason.');
       return;
     }
     try {
       await bookingService.rejectBooking(id, reason);
-      alert('Booking rejected');
+      await showSuccessPopup('Booking rejected', 'The booking request was rejected.');
       setRejectionReasons(prev => ({ ...prev, [id]: '' }));
       loadAllBookings();
     } catch (error) {
       console.error(error);
-      alert('Failed to reject booking');
+      await showErrorPopup('Reject failed', 'Failed to reject booking.');
     }
   };
 
@@ -130,6 +259,17 @@ export default function BookingsPage({ onLogout, user }) {
     return <span className="pill">{status}</span>;
   };
 
+  const getResourceDisplayName = (booking) => {
+    const directName = booking?.resource?.name || booking?.resourceName;
+    if (directName) return directName;
+
+    const bookingResourceId = booking?.resourceId || booking?.resource?.id;
+    const matchedResource = resources.find((r) => Number(r.id) === Number(bookingResourceId));
+    if (matchedResource?.name) return matchedResource.name;
+
+    return bookingResourceId || '-';
+  };
+
   return (
     <ResourceLayout onLogout={onLogout} user={user}>
 
@@ -139,11 +279,11 @@ export default function BookingsPage({ onLogout, user }) {
           <p className="resourcePageSubtitle">Schedule and manage your campus resource reservations.</p>
         </div>
         <span className={user?.role === 'ADMIN' ? 'roleBadge manager' : 'roleBadge viewer'}>
-          {user?.role === 'ADMIN' ? 'Admin Access' : 'User Access'}
+          {isAdmin ? 'Admin Access' : 'User Access'}
         </span>
       </section>
 
-      {user?.role !== 'ADMIN' ? (
+      {!isAdmin ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', width: '100%' }}>
           <section style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div className="card resourceSectionIntro">
@@ -158,12 +298,44 @@ export default function BookingsPage({ onLogout, user }) {
                   <input className="input" type="text" name="purpose" value={formData.purpose} onChange={handleFormChange} required placeholder="e.g. Study Group" />
                 </div>
                 <div>
-                  <label className="label">Resource ID</label>
-                  <input className="input" type="number" name="resourceId" value={formData.resourceId} onChange={handleFormChange} required placeholder="ID" />
+                  <label className="label">Resource</label>
+                  <select
+                    className="input"
+                    name="resourceId"
+                    value={formData.resourceId}
+                    onChange={handleFormChange}
+                    required
+                  >
+                    <option value="">Select a resource</option>
+                    {resources.map((r) => (
+                      <option key={r.id} value={r.id} disabled={unavailableResourceIds.includes(Number(r.id))}>
+                        {r.name} - {r.location} (Cap: {r.capacity})
+                        {unavailableResourceIds.includes(Number(r.id)) ? ' - Already booked' : ''}
+                      </option>
+                    ))}
+                  </select>
+                  {bookedResources.length > 0 ? (
+                    <small className="muted">
+                      Already booked for selected time: {bookedResources.map((r) => r.name).join(', ')}
+                    </small>
+                  ) : null}
                 </div>
                 <div>
                   <label className="label">Attendees</label>
-                  <input className="input" type="number" name="attendees" value={formData.attendees} onChange={handleFormChange} required min="1" placeholder="Estimated count" />
+                  <input
+                    className="input"
+                    type="number"
+                    name="attendees"
+                    value={formData.attendees}
+                    onChange={handleFormChange}
+                    required
+                    min="1"
+                    max={selectedResourceCapacity || undefined}
+                    placeholder="Estimated count"
+                  />
+                  {selectedResourceCapacity ? (
+                    <small className="muted">Maximum attendees for selected resource: {selectedResourceCapacity}</small>
+                  ) : null}
                 </div>
                 <div>
                   <label className="label">Date</label>
@@ -213,7 +385,7 @@ export default function BookingsPage({ onLogout, user }) {
                       {myBookings.map(b => (
                         <tr key={b.id}>
                           <td>#{b.id}</td>
-                          <td>{b.resourceId || b.resource?.id}</td>
+                          <td>{getResourceDisplayName(b)}</td>
                           <td>
                             <div>{b.date}</div>
                             <div style={{ fontSize: '0.8rem', color: '#666' }}>{b.startTime} - {b.endTime}</div>
@@ -240,6 +412,40 @@ export default function BookingsPage({ onLogout, user }) {
             <h2 className="resourceSectionTitle">All Bookings (Admin)</h2>
             <p className="resourceSectionText">Review and manage campus-wide resource requests.</p>
           </div>
+          {adminLoadError ? (
+            <div className="card" style={{ marginBottom: '12px', border: '1px solid #f79b9bff', background: '#e6dfdfff' }}>
+              <strong>Could not load admin bookings.</strong> {adminLoadError}
+            </div>
+          ) : null}
+
+          <form onSubmit={applyAdminFilters} className="grid2" style={{ gap: '12px', marginBottom: '16px' }}>
+            <div>
+              <label className="label">Status</label>
+              <select className="input" name="status" value={adminFilters.status} onChange={handleAdminFilterChange}>
+                <option value="">All</option>
+                <option value="PENDING">PENDING</option>
+                <option value="APPROVED">APPROVED</option>
+                <option value="REJECTED">REJECTED</option>
+                <option value="CANCELLED">CANCELLED</option>
+              </select>
+            </div>
+            <div>
+              <label className="label">Date</label>
+              <input className="input" type="date" name="date" value={adminFilters.date} onChange={handleAdminFilterChange} />
+            </div>
+            <div>
+              <label className="label">Resource ID</label>
+              <input className="input" type="number" min="1" name="resourceId" value={adminFilters.resourceId} onChange={handleAdminFilterChange} placeholder="e.g. 1" />
+            </div>
+            <div>
+              <label className="label">User ID</label>
+              <input className="input" type="number" min="1" name="userId" value={adminFilters.userId} onChange={handleAdminFilterChange} placeholder="e.g. 2" />
+            </div>
+            <div className="row" style={{ display: 'flex', gap: '8px', alignItems: 'end' }}>
+              <button type="submit" className="btnPrimary">Apply Filters</button>
+              <button type="button" className="btnMini" onClick={clearAdminFilters}>Clear</button>
+            </div>
+          </form>
 
           {allBookings.length === 0 ? (
             <div className="muted" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
