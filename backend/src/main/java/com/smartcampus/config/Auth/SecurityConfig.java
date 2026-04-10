@@ -14,7 +14,6 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import java.util.Arrays;
 
 import com.smartcampus.service.Auth.CustomUserDetailsService;
-import com.smartcampus.service.Auth.CustomOAuth2UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -26,9 +25,6 @@ public class SecurityConfig {
 
     @Autowired
     private CustomUserDetailsService userDetailsService;
-
-    @Autowired
-    private CustomOAuth2UserService oauth2UserService;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -59,11 +55,7 @@ public class SecurityConfig {
                         .deleteCookies("JSESSIONID")
                         .logoutSuccessHandler((request, response, authentication) -> response.setStatus(200))
                         .permitAll())
-                .httpBasic(org.springframework.security.config.Customizer.withDefaults())
-                .oauth2Login(oauth2 -> oauth2
-                        .userInfoEndpoint(userInfo -> userInfo.userService(oauth2UserService))
-                        .defaultSuccessUrl("http://localhost:5173", true) // Redirect to frontend after success
-                );
+                .httpBasic(org.springframework.security.config.Customizer.withDefaults());
 
         return http.build();
     }
@@ -71,10 +63,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://localhost:5174")); // Vite
-                                                                                                          // frontend
-                                                                                                          // URL from
-                                                                                                          // both ports
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://localhost:5174"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept"));
         configuration.setAllowCredentials(true);
