@@ -33,6 +33,9 @@ const adminBtn = {
   fontFamily: "inherit",
 };
 
+const adminRequestLine = { fontSize: 13, color: "#0f172a", lineHeight: 1.45, marginBottom: 5 };
+const adminRequestKey = { color: "#64748b", fontWeight: 600 };
+
 export default function TicketTable({
   tickets,
   isAdmin,
@@ -59,7 +62,12 @@ export default function TicketTable({
       {tickets.map((ticket) => (
         <div key={ticket.id} style={{ border: "1px solid #e5e7eb", borderRadius: 10, padding: 12 }}>
           <div style={{ display: "flex", justifyContent: "space-between", gap: 10, flexWrap: "wrap", alignItems: "flex-start" }}>
-            <strong>#{ticket.id} - {ticket.category}</strong>
+            <div>
+              <strong>Ticket #{ticket.id}</strong>
+              <div style={{ fontSize: 13, color: "#64748b", marginTop: 2 }}>
+                <span style={{ fontWeight: 600, color: "#475569" }}>Category:</span> {ticket.category || "—"}
+              </div>
+            </div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
               {isAdmin && canAdminArchive(ticket.status) && typeof onAdminDownloadResolvedPdf === "function" ? (
                 <button type="button" style={adminBtn} onClick={() => onAdminDownloadResolvedPdf(ticket.id)}>
@@ -100,10 +108,33 @@ export default function TicketTable({
             >
               <div style={{ border: "1px solid #e2e8f0", borderRadius: 10, padding: 10, background: "#f8fafc" }}>
                 <div style={{ fontSize: 12, fontWeight: 700, color: "#334155", marginBottom: 6 }}>USER REQUEST DETAILS</div>
-                <div style={{ marginBottom: 4 }}>{ticket.description}</div>
-                <div style={{ color: "var(--muted)", fontSize: 13 }}>{ticket.resourceLocation}</div>
-                <div style={{ color: "var(--muted)", fontSize: 13 }}>Priority: {ticket.priority}</div>
-                {ticket.createdAt ? <div style={{ color: "var(--muted)", fontSize: 12, marginTop: 4 }}>Created: {new Date(ticket.createdAt).toLocaleString()}</div> : null}
+                <div style={adminRequestLine}>
+                  <span style={adminRequestKey}>Description</span>
+                  {" - "}
+                  {ticket.description?.trim() ? ticket.description : "—"}
+                </div>
+                <div style={adminRequestLine}>
+                  <span style={adminRequestKey}>Resource / location</span>
+                  {" - "}
+                  {ticket.resourceLocation?.trim() ? ticket.resourceLocation : "—"}
+                </div>
+                <div style={adminRequestLine}>
+                  <span style={adminRequestKey}>Priority</span>
+                  {" - "}
+                  {ticket.priority || "—"}
+                </div>
+                <div style={adminRequestLine}>
+                  <span style={adminRequestKey}>Preferred contact</span>
+                  {" - "}
+                  {ticket.preferredContact?.trim() ? ticket.preferredContact : "—"}
+                </div>
+                {ticket.createdAt ? (
+                  <div style={{ ...adminRequestLine, marginBottom: 0 }}>
+                    <span style={adminRequestKey}>Submitted</span>
+                    {" - "}
+                    {new Date(ticket.createdAt).toLocaleString()}
+                  </div>
+                ) : null}
               </div>
 
               <div style={{ border: "1px solid #e2e8f0", borderRadius: 10, padding: 10, background: "#f8fafc" }}>
@@ -117,8 +148,19 @@ export default function TicketTable({
             </div>
           ) : (
             <>
-              <div>{ticket.description}</div>
-              <div style={{ color: "var(--muted)", fontSize: 13 }}>{ticket.resourceLocation} | Priority: {ticket.priority}</div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: "#64748b", marginBottom: 2 }}>Description</div>
+              <div style={{ marginBottom: 8 }}>{ticket.description}</div>
+              <div style={{ fontSize: 13, color: "var(--muted)" }}>
+                <strong style={{ color: "#475569" }}>Where:</strong> {ticket.resourceLocation || "—"}{" "}
+                <span style={{ margin: "0 6px", opacity: 0.5 }}>|</span>
+                <strong style={{ color: "#475569" }}>Priority:</strong> {ticket.priority}
+                {ticket.preferredContact ? (
+                  <>
+                    <span style={{ margin: "0 6px", opacity: 0.5 }}>|</span>
+                    <strong style={{ color: "#475569" }}>Contact:</strong> {ticket.preferredContact}
+                  </>
+                ) : null}
+              </div>
               {ticket.assignedTechnicianName ? <div style={{ fontSize: 13 }}>Assigned: {ticket.assignedTechnicianName}</div> : null}
               {ticket.resolutionNotes ? <div style={{ fontSize: 13 }}>Resolution: {ticket.resolutionNotes}</div> : null}
               {ticket.rejectionReason ? <div style={{ fontSize: 13, color: "#b71c1c" }}>Rejected: {ticket.rejectionReason}</div> : null}
