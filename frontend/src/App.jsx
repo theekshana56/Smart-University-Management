@@ -13,6 +13,7 @@ import ProfilePage from "./pages/ProfilePage";
 import ManageUsersPage from "./pages/ManageUsersPage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 import LandingPage from "./pages/LandingPage";
+import PublicInfoPage from "./pages/PublicInfoPage";
 import AppLoader from "./components/common/AppLoader";
 
 const AUTH_HEADER_STORAGE_KEY = "sum_auth_header";
@@ -56,6 +57,18 @@ function AppRoutes({ user, onLogin, onLogout, onProfileUpdate }) {
               <LandingPage user={user} onLogout={onLogout} />
             )
           }
+        />
+        <Route
+          path="/about"
+          element={isAuthenticated ? <Navigate to="/" replace /> : <PublicInfoPage pageKey="about" />}
+        />
+        <Route
+          path="/features"
+          element={isAuthenticated ? <Navigate to="/" replace /> : <PublicInfoPage pageKey="features" />}
+        />
+        <Route
+          path="/contact"
+          element={isAuthenticated ? <Navigate to="/" replace /> : <PublicInfoPage pageKey="contact" />}
         />
 
         <Route
