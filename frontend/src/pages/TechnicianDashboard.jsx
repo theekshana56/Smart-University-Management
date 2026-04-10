@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { ticketService } from "../services/ticketService";
 import TicketTable from "../components/tickets/TicketTable";
-import { confirmPopup, promptPopup } from "../utils/popup";
+import { confirmPopup, promptPopup, showErrorPopup } from "../utils/popup";
 import "../components/resource/resource.css";
 import "./notifications.css";
 
@@ -417,6 +417,26 @@ export default function TechnicianDashboard({ user }) {
                   if (confirmed) {
                     await ticketService.deleteComment(commentId);
                     await loadTickets();
+                  }
+                }}
+                onDeleteResolvedTicket={async (ticketId) => {
+                  const confirmed = await confirmPopup({
+                    title: "Delete this ticket?",
+                    text: "Only resolved tickets can be removed. This cannot be undone.",
+                    confirmButtonText: "Yes, delete ticket",
+                    cancelButtonText: "Cancel",
+                    icon: "warning",
+                  });
+                  if (confirmed) {
+                    try {
+                      await ticketService.deleteResolvedTicket(ticketId);
+                      await loadTickets();
+                    } catch (e) {
+                      showErrorPopup(
+                        "Could not delete",
+                        String(e?.response?.data || e?.message || "Request failed")
+                      );
+                    }
                   }
                 }}
               />

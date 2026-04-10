@@ -92,13 +92,26 @@ public class TicketService {
 
     @Transactional
     public void deleteResolvedTicket(Long ticketId, User actor) {
-        requireRole(actor, "ADMIN");
         Ticket ticket = getTicket(ticketId);
         TicketStatus st = ticket.getStatus();
         if (st != TicketStatus.RESOLVED && st != TicketStatus.CLOSED) {
             throw new IllegalArgumentException("Only resolved or closed tickets can be deleted");
         }
-        ticketRepository.delete(ticket);
+        String role = actor.getRole() == null ? "" : actor.getRole().toUpperCase(Locale.ROOT);
+        if ("ADMIN".equals(role)) {
+            ticketRepository.delete(ticket);
+            return;
+        }
+        if ("TECHNICIAN".equals(role)) {
+            if (ticket.getAssignedTechnician() == null
+                    || !Objects.requireNonNull(actor.getId(), "Actor id is required")
+                            .equals(ticket.getAssignedTechnician().getId())) {
+                throw new IllegalArgumentException("Forbidden");
+            }
+            ticketRepository.delete(ticket);
+            return;
+        }
+        throw new IllegalArgumentException("Forbidden");
     }
 
     @Transactional(readOnly = true)
