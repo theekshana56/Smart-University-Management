@@ -35,3 +35,4 @@ public class BookingRequest {
     @Min(value = 1, message = "Attendees must be at least 1")
     private int attendees;
 }
+//

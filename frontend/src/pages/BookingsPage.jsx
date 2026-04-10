@@ -473,7 +473,7 @@ export default function BookingsPage({ onLogout, user }) {
                       <td>{b.resourceId || b.resource?.id}</td>
                       <td>
                         <div>{b.date}</div>
-                        <div style={{ fontSize: '0.8rem', color: '#666' }}>{b.startTime} - {b.endTime}</div>
+                        <div style={{ fontSize: '0.8rem', color: '#635f5fff' }}>{b.startTime} - {b.endTime}</div>
                       </td>
                       <td>{getStatusBadge(b.status)}</td>
                       <td>
