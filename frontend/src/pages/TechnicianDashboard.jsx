@@ -5,12 +5,34 @@ import { confirmPopup, promptPopup } from "../utils/popup";
 import "../components/resource/resource.css";
 import "./notifications.css";
 
+const FILTERS = [
+  {
+    key: "ALL",
+    label: "Total assigned",
+    getCount: (tickets) => tickets.length,
+    dot: null,
+  },
+  {
+    key: "IN_PROGRESS",
+    label: "In progress",
+    getCount: (tickets) => tickets.filter((t) => t.status === "IN_PROGRESS").length,
+    dot: "#3b82f6",
+  },
+  {
+    key: "RESOLVED",
+    label: "Resolved",
+    getCount: (tickets) => tickets.filter((t) => t.status === "RESOLVED").length,
+    dot: "#10b981",
+  },
+];
+
 export default function TechnicianDashboard({ user }) {
   const [tickets, setTickets] = useState([]);
   const [commentsByTicket, setCommentsByTicket] = useState({});
   const [commentDrafts, setCommentDrafts] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [filter, setFilter] = useState("ALL");
 
   const loadTickets = async () => {
     setLoading(true);
@@ -42,8 +64,14 @@ export default function TechnicianDashboard({ user }) {
     await loadTickets();
   };
 
-  const inProgress = tickets.filter((t) => t.status === "IN_PROGRESS").length;
-  const resolved = tickets.filter((t) => t.status === "RESOLVED").length;
+  const filteredTickets = tickets.filter((ticket) => {
+    if (filter === "ALL") return true;
+    if (filter === "IN_PROGRESS") return ticket.status === "IN_PROGRESS";
+    if (filter === "RESOLVED") return ticket.status === "RESOLVED";
+    return true;
+  });
+
+  const activeFilter = FILTERS.find((f) => f.key === filter);
 
   return (
     <>
@@ -91,29 +119,48 @@ export default function TechnicianDashboard({ user }) {
           flex-shrink: 0;
         }
 
-        /* ── Stat strip ── */
-        .td-stats {
+        /* ── Three filter tabs (total / in progress / resolved) ── */
+        .td-filter-stats {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
           gap: 1px;
           background: #e2e8f0;
           border: 1px solid #e2e8f0;
-          border-radius: 14px;
+          border-radius: 14px 14px 0 0;
           overflow: hidden;
         }
 
-        .td-stat {
-          background: #fff;
-          padding: 18px 22px;
+        .td-filter-stat {
           display: flex;
           flex-direction: column;
-          gap: 5px;
+          justify-content: center;
+          gap: 4px;
+          padding: 16px 20px;
+          background: #fff;
+          cursor: pointer;
+          transition: background 0.12s;
+          position: relative;
+          border: none;
+          text-align: left;
+          font-family: inherit;
         }
 
-        .td-stat-label {
+        .td-filter-stat:hover { background: #f8fafc; }
+        .td-filter-stat.active { background: #f8fafc; }
+
+        .td-filter-stat.active::after {
+          content: '';
+          position: absolute;
+          bottom: 0; left: 0; right: 0;
+          height: 2px;
+          background: #1e293b;
+          border-radius: 2px 2px 0 0;
+        }
+
+        .td-filter-stat-label {
           font-size: 11px;
           font-weight: 500;
-          letter-spacing: 0.07em;
+          letter-spacing: 0.06em;
           text-transform: uppercase;
           color: #94a3b8;
           display: flex;
@@ -121,23 +168,54 @@ export default function TechnicianDashboard({ user }) {
           gap: 6px;
         }
 
-        .td-stat-dot {
+        .td-filter-stat.active .td-filter-stat-label { color: #475569; }
+
+        .td-filter-stat-dot {
           width: 6px;
           height: 6px;
           border-radius: 50%;
+          flex-shrink: 0;
         }
 
-        .td-stat-value {
+        .td-filter-stat-value {
           font-family: 'Geist Mono', monospace;
-          font-size: 28px;
+          font-size: 26px;
           font-weight: 500;
           color: #0f172a;
           line-height: 1;
         }
 
-        .td-stat-sub {
+        .td-filter-stat-sub {
           font-size: 11px;
           color: #cbd5e1;
+        }
+
+        .td-filter-toolbar {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 10px 20px;
+          background: #fff;
+          border: 1px solid #e2e8f0;
+          border-top: none;
+          border-radius: 0 0 14px 14px;
+          gap: 12px;
+          flex-wrap: wrap;
+        }
+
+        .td-filter-crumb {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 12px;
+          color: #94a3b8;
+        }
+
+        .td-filter-crumb-sep { color: #cbd5e1; }
+
+        .td-filter-crumb-active {
+          color: #334155;
+          font-weight: 500;
         }
 
         /* ── Table card ── */
@@ -223,31 +301,46 @@ export default function TechnicianDashboard({ user }) {
           <section className="card resourcePageHeader notificationsHeader td-pageHeader">
             <div>
               <h1 className="resourcePageTitle">Technician Dashboard</h1>
-              
+              <p className="resourcePageSubtitle">Assigned tasks connected to your account.</p>
             </div>
             <span className="td-roleBadge">{user?.role || "TECHNICIAN"}</span>
           </section>
 
-          {/* ── Stat strip ── */}
-          <div className="td-stats">
-            <div className="td-stat">
-              <span className="td-stat-label">Total assigned</span>
-              <span className="td-stat-value">{tickets.length}</span>
-              <span className="td-stat-sub">all tickets</span>
+          <div>
+            <div className="td-filter-stats">
+              {FILTERS.map((f) => {
+                const count = f.getCount(tickets);
+                const isActive = filter === f.key;
+                return (
+                  <button
+                    key={f.key}
+                    type="button"
+                    className={`td-filter-stat${isActive ? " active" : ""}`}
+                    onClick={() => setFilter(f.key)}
+                  >
+                    <span className="td-filter-stat-label">
+                      {f.dot && (
+                        <span className="td-filter-stat-dot" style={{ background: f.dot }} />
+                      )}
+                      {f.label}
+                    </span>
+                    <span className="td-filter-stat-value">{count}</span>
+                    {f.key === "ALL" && (
+                      <span className="td-filter-stat-sub">all tickets</span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
-            <div className="td-stat">
-              <span className="td-stat-label">
-                <span className="td-stat-dot" style={{ background: "#3b82f6" }} />
-                In progress
+            <div className="td-filter-toolbar">
+              <div className="td-filter-crumb">
+                <span>Tickets</span>
+                <span className="td-filter-crumb-sep">/</span>
+                <span className="td-filter-crumb-active">{activeFilter?.label}</span>
+              </div>
+              <span style={{ fontSize: 12, color: "#94a3b8" }}>
+                {filteredTickets.length} of {tickets.length} shown
               </span>
-              <span className="td-stat-value">{inProgress}</span>
-            </div>
-            <div className="td-stat">
-              <span className="td-stat-label">
-                <span className="td-stat-dot" style={{ background: "#10b981" }} />
-                Resolved
-              </span>
-              <span className="td-stat-value">{resolved}</span>
             </div>
           </div>
 
@@ -257,7 +350,7 @@ export default function TechnicianDashboard({ user }) {
               <span className="td-table-title">
                 My Tickets
                 {!loading && (
-                  <span className="td-count-badge">{tickets.length}</span>
+                  <span className="td-count-badge">{filteredTickets.length}</span>
                 )}
               </span>
               {loading && <span className="td-spinner" />}
@@ -272,9 +365,14 @@ export default function TechnicianDashboard({ user }) {
                 <span className="td-state-icon">📋</span>
                 No assigned tickets right now.
               </div>
+            ) : !loading && !error && filteredTickets.length === 0 ? (
+              <div className="td-state">
+                <span className="td-state-icon">📋</span>
+                No tickets in this category.
+              </div>
             ) : (
               <TicketTable
-                tickets={tickets}
+                tickets={filteredTickets}
                 isAdmin={false}
                 isTechnician
                 users={[]}
