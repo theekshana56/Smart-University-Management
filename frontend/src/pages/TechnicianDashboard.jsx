@@ -2,11 +2,10 @@ import { useEffect, useState } from "react";
 import { ticketService } from "../services/ticketService";
 import TicketTable from "../components/tickets/TicketTable";
 import { confirmPopup, promptPopup } from "../utils/popup";
-import { useNavigate } from "react-router-dom";
 import "../components/resource/resource.css";
+import "./notifications.css";
 
-export default function TechnicianDashboard({ onLogout, user }) {
-  const navigate = useNavigate();
+export default function TechnicianDashboard({ user }) {
   const [tickets, setTickets] = useState([]);
   const [commentsByTicket, setCommentsByTicket] = useState({});
   const [commentDrafts, setCommentDrafts] = useState({});
@@ -45,118 +44,51 @@ export default function TechnicianDashboard({ onLogout, user }) {
 
   const inProgress = tickets.filter((t) => t.status === "IN_PROGRESS").length;
   const resolved = tickets.filter((t) => t.status === "RESOLVED").length;
-  const pending = tickets.filter((t) => t.status !== "RESOLVED" && t.status !== "REJECTED").length;
-
-  const initials = user?.name
-    ? user.name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()
-    : "T";
 
   return (
     <>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap');
 
-        .td-root {
-          min-height: 100vh;
-          padding: 28px 24px;
-          background: linear-gradient(180deg, #d9dce3 0, #ced3dc 100%);
-          font-family: 'Geist', system-ui, sans-serif;
-        }
-
         .td-inner {
-          max-width: 1400px;
-          margin: 0 auto;
           width: 100%;
           display: grid;
           gap: 16px;
+          font-family: 'Geist', system-ui, sans-serif;
         }
 
-        /* ── Top header card ── */
-        .td-header {
-          background: #fff;
-          border: 1px solid #e2e8f0;
-          border-radius: 16px;
-          padding: 20px 24px;
+        .td-pageHeader {
           display: flex;
-          align-items: center;
+          align-items: flex-start;
           justify-content: space-between;
           gap: 16px;
           flex-wrap: wrap;
         }
 
-        .td-header-left {
-          display: flex;
-          align-items: center;
-          gap: 14px;
-        }
-
-        .td-avatar {
-          width: 44px;
-          height: 44px;
-          border-radius: 12px;
-          background: #1e293b;
-          color: #fff;
-          font-size: 15px;
-          font-weight: 600;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-shrink: 0;
-          letter-spacing: 0.5px;
-        }
-
-        .td-title-group h2 {
-          margin: 0 0 2px;
-          font-size: 17px;
-          font-weight: 600;
+        .td-pageHeader .resourcePageTitle {
+          margin: 0 0 6px;
+          font-size: 1.35rem;
+          font-weight: 700;
           color: #0f172a;
         }
 
-        .td-title-group p {
+        .td-pageHeader .resourcePageSubtitle {
           margin: 0;
-          font-size: 13px;
-          color: #94a3b8;
+          font-size: 14px;
+          color: #64748b;
+          line-height: 1.4;
         }
 
-        .td-header-actions {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-
-        .td-btn {
-          display: inline-flex;
-          align-items: center;
-          gap: 7px;
-          padding: 8px 16px;
-          border-radius: 10px;
-          font-size: 13px;
-          font-weight: 500;
-          cursor: pointer;
-          font-family: 'Geist', system-ui, sans-serif;
-          transition: all 0.12s;
-          white-space: nowrap;
-        }
-
-        .td-btn-ghost {
-          background: #fff;
-          border: 1px solid #e2e8f0;
-          color: #334155;
-        }
-
-        .td-btn-ghost:hover {
-          background: #f8fafc;
-          border-color: #cbd5e1;
-        }
-
-        .td-btn-dark {
-          background: #1e293b;
-          border: 1px solid #1e293b;
-          color: #fff;
-        }
-
-        .td-btn-dark:hover {
-          background: #0f172a;
+        .td-roleBadge {
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: #3b82f6;
+          background: rgba(59, 130, 246, 0.12);
+          padding: 6px 10px;
+          border-radius: 999px;
+          flex-shrink: 0;
         }
 
         /* ── Stat strip ── */
@@ -287,42 +219,14 @@ export default function TechnicianDashboard({ onLogout, user }) {
         @keyframes td-spin { to { transform: rotate(360deg); } }
       `}</style>
 
-      <main className="td-root">
-        <div className="td-inner">
-
-          {/* ── Header ── */}
-          <div className="td-header">
-            <div className="td-header-left">
-              <div className="td-avatar">{initials}</div>
-              <div className="td-title-group">
-                <h2>Technician Dashboard</h2>
-                <p>Assigned tasks connected to your account</p>
-              </div>
+      <div className="td-inner">
+          <section className="card resourcePageHeader notificationsHeader td-pageHeader">
+            <div>
+              <h1 className="resourcePageTitle">Technician Dashboard</h1>
+              
             </div>
-            <div className="td-header-actions">
-              <button
-                className="td-btn td-btn-ghost"
-                onClick={() => navigate("/notifications")}
-              >
-                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M8 2a5 5 0 0 1 5 5v2l1 2H2l1-2V7a5 5 0 0 1 5-5Z"/>
-                  <path d="M6.5 13.5a1.5 1.5 0 0 0 3 0"/>
-                </svg>
-                Notifications
-              </button>
-              <button
-                className="td-btn td-btn-dark"
-                onClick={onLogout}
-              >
-                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M6 14H3a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h3"/>
-                  <polyline points="11 11 14 8 11 5"/>
-                  <line x1="14" y1="8" x2="6" y2="8"/>
-                </svg>
-                Logout
-              </button>
-            </div>
-          </div>
+            <span className="td-roleBadge">{user?.role || "TECHNICIAN"}</span>
+          </section>
 
           {/* ── Stat strip ── */}
           <div className="td-stats">
@@ -421,8 +325,7 @@ export default function TechnicianDashboard({ onLogout, user }) {
             )}
           </div>
 
-        </div>
-      </main>
+      </div>
     </>
   );
 }

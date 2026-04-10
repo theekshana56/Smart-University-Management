@@ -19,7 +19,11 @@ export default function TicketsPage({ onLogout, user }) {
   const isAdmin = user?.role === "ADMIN";
   const isTechnician = user?.role === "TECHNICIAN";
   if (user?.role === "TECHNICIAN") {
-    return <TechnicianDashboard onLogout={onLogout} user={user} />;
+    return (
+      <ResourceLayout onLogout={onLogout} user={user}>
+        <TechnicianDashboard user={user} />
+      </ResourceLayout>
+    );
   }
   if (isAdmin) {
     return (
