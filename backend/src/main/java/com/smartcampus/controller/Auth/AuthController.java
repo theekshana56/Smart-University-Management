@@ -33,6 +33,7 @@ import java.util.Optional;
 import com.smartcampus.repository.BookingRepository;
 import com.smartcampus.repository.CommentRepository;
 import com.smartcampus.repository.NotificationRepository;
+import com.smartcampus.repository.TicketAttachmentRepository;
 import com.smartcampus.repository.TicketRepository;
 
 @RestController
@@ -56,6 +57,9 @@ public class AuthController {
 
     @Autowired
     private TicketRepository ticketRepository;
+
+    @Autowired
+    private TicketAttachmentRepository ticketAttachmentRepository;
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@RequestBody SignupRequest request) {
@@ -171,6 +175,7 @@ public class AuthController {
     }
 
     @DeleteMapping("/admin/users/{id}")
+    @Transactional
     public ResponseEntity<?> deleteUserByAdmin(@PathVariable long id, Authentication authentication) {
         if (!isAdmin(authentication)) {
             return ResponseEntity.status(403).body("Forbidden: Admins only");
@@ -187,7 +192,8 @@ public class AuthController {
             return ResponseEntity.badRequest().body("You cannot delete your own account.");
         }
 
-        userRepository.deleteById(id);
+        removeUserDependencies(target.getId());
+        userRepository.delete(target);
         return ResponseEntity.ok("User deleted successfully.");
     }
 
@@ -291,15 +297,21 @@ public class AuthController {
         User user = userOpt.get();
         Long userId = user.getId();
 
-        // Remove dependent records first to avoid FK violations.
-        notificationRepository.deleteAllByRecipientId(userId);
-        commentRepository.deleteAllByAuthorId(userId);
-        bookingRepository.deleteAllByUserId(userId);
-        ticketRepository.clearAssignedTechnician(userId);
-        ticketRepository.deleteAllCreatedBy(userId);
+        removeUserDependencies(userId);
         userRepository.delete(user);
 
         return ResponseEntity.ok("Your account has been deleted.");
+    }
+
+    private void removeUserDependencies(Long userId) {
+        notificationRepository.deleteAllByRecipientId(userId);
+        bookingRepository.deleteAllByUserId(userId);
+        ticketRepository.clearAssignedTechnician(userId);
+        // Bulk ticket delete does not run JPA cascades; clear children first.
+        ticketAttachmentRepository.deleteAllByTicketCreatedByUserId(userId);
+        commentRepository.deleteAllOnTicketsCreatedByUserId(userId);
+        commentRepository.deleteAllByAuthorId(userId);
+        ticketRepository.deleteAllCreatedBy(userId);
     }
 
     private String resolveEmail(Authentication authentication) {
